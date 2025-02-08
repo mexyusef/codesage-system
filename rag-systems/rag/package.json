@@ -6,6 +6,7 @@
   "scripts": {
     "rag": "npx tsc rag/main.ts",
     "dev": "tsc && node dist\\main.js",
+    "q": "tsc && node dist\\app.cli.js",
     "start": "node dist\\main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
