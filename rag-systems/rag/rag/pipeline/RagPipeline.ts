@@ -2,6 +2,7 @@ import { Chunker } from "../chunking/Chunker.js"
 import { Embedder } from "../embedding/Embedder.js"
 import { VectorDatabase } from "../indexing/VectorDatabase.js"
 import { QueryEngine } from "../querying/QueryEngine.js"
+import { IndexedDocument } from "../types.js"
 import { listFiles } from "./listFiles.js"
 
 export class RagPipeline {
@@ -32,7 +33,7 @@ export class RagPipeline {
 
 	async query(prompt: string): Promise<string> {
 		const results = await this.queryEngine.query(prompt)
-		const context = results.map((doc) => doc.metadata.text).join("\n")
+		const context = results.map((doc: IndexedDocument) => doc.metadata.text).join("\n")
 		return `${prompt}\n\nContext:\n${context}`
 	}
 }
