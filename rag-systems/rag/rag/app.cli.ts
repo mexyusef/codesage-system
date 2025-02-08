@@ -7,12 +7,29 @@ import { embeddings } from "./services/openAIService.js";
 import { createChain } from "./services/chainService.js";
 import { queryRagSystem } from "./utils/queryRagSystem.js";
 import readline from "readline";
+import path from "path";
 
 export async function main(): Promise<void> {
   try {
-    // Load environment variables and validate folder path
+    // Load environment variables
     loadEnv();
-    const folderPath = process.env.RAG_FOLDER_PATH || ".";
+
+    // Create a readline interface for user input
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+
+    // Prompt the user for the folder path
+    const defaultFolderPath = process.env.RAG_FOLDER_PATH || path.resolve(".");
+    const folderPathPrompt = `Enter the folder path for RAG processing (default: ${defaultFolderPath}): `;
+    const folderPath = await new Promise<string>((resolve) => {
+      rl.question(folderPathPrompt, (input: string) => {
+        resolve(input.trim() || defaultFolderPath);
+      });
+    });
+
+    // Validate the folder path
     validateFolderPath(folderPath);
 
     // Process files and prepare documents
@@ -27,16 +44,9 @@ export async function main(): Promise<void> {
     const pineconeStore = await initializePineconeStore(docs, embeddings);
     const retrievalChain = await createChain(pineconeStore);
 
-    // Create a readline interface for user input
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-
     console.log("Welcome to the RAG System REPL!");
     console.log("Type 'exit' to quit.");
 
-    // Start the REPL loop
     const askQuestion = (): void => {
       rl.question("Enter your query: ", async (query: string) => {
         if (query.trim().toLowerCase() === "exit") {
@@ -52,18 +62,16 @@ export async function main(): Promise<void> {
           console.error("Error processing query:", error);
         }
 
-        // Ask the next question
         askQuestion();
       });
     };
 
-    // Start the first question
     askQuestion();
+
   } catch (error) {
     console.error("Application error:", error);
     process.exit(1);
   }
 }
 
-// Run the application
 main();

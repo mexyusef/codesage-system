@@ -6,7 +6,6 @@ function loadEnv() {
   let __dirname__;
   __dirname__ = getDirname();
 
-
   const env = process.env.NODE_ENV || 'development';
 
   // Load the appropriate .env file based on the environment

@@ -4,6 +4,20 @@ Simple RAG system for CodeSage.
 
 Current Status: error for pinecone.
 
+# How to use
+
+## Create .env file
+```bash
+PINECONE_API_KEY=pcsk_...
+PINECONE_INDEX_NAME=...
+OPENAI_API_KEY=sk-...
+WEAVIATE_API_KEY=
+RAG_FOLDER_PATH=
+```
+
+## Run on terminal
+`npm run rag`
+
 # Documentation
 
 ## Langchain

@@ -11,7 +11,7 @@ export function walkDirectory(folderPath: string): string[] {
   const walk = (dir: string): void => {
     const dirFiles = fs.readdirSync(dir);
     for (const file of dirFiles) {
-      const fullPath = path.join(dir, file);
+      const fullPath = path.resolve(dir, file); // Resolve to absolute path
       if (fs.statSync(fullPath).isDirectory()) {
         walk(fullPath);
       } else {
@@ -19,7 +19,7 @@ export function walkDirectory(folderPath: string): string[] {
       }
     }
   };
-  walk(folderPath);
+  walk(path.resolve(folderPath)); // Start with resolved folder path
   return files;
 }
 
@@ -34,7 +34,7 @@ export async function readAndFilterFiles(
         return null;
       }
       try {
-        const content = await fs.readFile(path.join(folderPath, file), "utf-8");
+        const content = await fs.readFile(file, "utf-8"); // File is already an absolute path
         if (!content.trim()) {
           console.warn(`Skipping empty file: ${file}`);
           return null;

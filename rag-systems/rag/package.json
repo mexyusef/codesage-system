@@ -1,12 +1,13 @@
 {
   "name": "rag",
   "version": "1.0.0",
-  "description": "Simple RAG",
+  "description": "RAG Sage",
   "main": "index.ts",
   "scripts": {
-    "rag": "npx tsc rag/main.ts",
+    "rag:old": "npx tsc rag/main.ts",
     "dev": "tsc && node dist\\main.js",
     "q": "tsc && node dist\\app.cli.js",
+    "rag": "tsc && node dist\\app.cli.js",
     "start": "node dist\\main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
