@@ -1,5 +1,5 @@
-import { Chunk } from "../types"
-import { Chunker } from "./Chunker"
+import { Chunk } from "../types.js"
+import { Chunker } from "./Chunker.js"
 
 export class SentenceChunker extends Chunker {
 	private maxTokens: number

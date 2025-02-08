@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv';
 import * as path from 'path';
-import { getDirname } from './getDirname';
+import { getDirname } from './getDirname.js';
 
 function loadEnv() {
   let __dirname__;

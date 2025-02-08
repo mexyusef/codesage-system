@@ -1,8 +1,8 @@
-import { Chunker } from "../chunking/Chunker"
-import { Embedder } from "../embedding/Embedder"
-import { VectorDatabase } from "../indexing/VectorDatabase"
-import { QueryEngine } from "../querying/QueryEngine"
-import { listFiles } from "./listFiles"
+import { Chunker } from "../chunking/Chunker.js"
+import { Embedder } from "../embedding/Embedder.js"
+import { VectorDatabase } from "../indexing/VectorDatabase.js"
+import { QueryEngine } from "../querying/QueryEngine.js"
+import { listFiles } from "./listFiles.js"
 
 export class RagPipeline {
 	private chunker: Chunker

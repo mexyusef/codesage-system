@@ -16,3 +16,13 @@ https://js.langchain.com/docs/integrations/text_embedding/openai/
 https://app.pinecone.io/
 https://docs.pinecone.io/guides/get-started/overview
 
+await pinecone.createIndex({
+  name: process.env.PINECONE_INDEX_NAME,
+  dimension: 1536, // Match your embedding dimension
+  metric: 'cosine'
+});
+
+## Weaviate
+
+### v2
+https://weaviate.io/developers/weaviate/client-libraries/typescript/typescript-v2

@@ -1,5 +1,5 @@
-import { Embedding } from "../types"
-import { Embedder } from "./Embedder"
+import { Embedding } from "../types.js"
+import { Embedder } from "./Embedder.js"
 import axios from "axios"
 
 export class OpenAIEmbedder extends Embedder {

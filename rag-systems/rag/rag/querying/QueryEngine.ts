@@ -1,6 +1,6 @@
-import { Embedder } from "../embedding/Embedder"
-import { VectorDatabase } from "../indexing/VectorDatabase"
-import { IndexedDocument } from "../types"
+import { Embedder } from "../embedding/Embedder.js"
+import { VectorDatabase } from "../indexing/VectorDatabase.js"
+import { IndexedDocument } from "../types.js"
 
 export class QueryEngine {
 	private embedder: Embedder

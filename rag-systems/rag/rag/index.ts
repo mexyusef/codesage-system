@@ -1,8 +1,8 @@
-import { TokenChunker } from "./chunking/TokenChunker"
-import { OpenAIEmbedder } from "./embedding/OpenAIEmbedder"
-import { getDirname } from "./getDirname"
-import { PineconeIndexer } from "./indexing/PineconeIndexer"
-import { RagPipeline } from "./pipeline/RagPipeline"
+import { TokenChunker } from "./chunking/TokenChunker.js"
+import { OpenAIEmbedder } from "./embedding/OpenAIEmbedder.js"
+import { getDirname } from "./getDirname.js"
+import { PineconeIndexer } from "./indexing/PineconeIndexer.js"
+import { RagPipeline } from "./pipeline/RagPipeline.js"
 
 const chunker = new TokenChunker(100)
 const embedder = new OpenAIEmbedder("your-openai-api-key")

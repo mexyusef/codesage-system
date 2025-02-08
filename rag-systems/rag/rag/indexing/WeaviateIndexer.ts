@@ -1,19 +1,20 @@
-import weaviate from "weaviate-ts-client"
-import { VectorDatabase } from "./VectorDatabase"
-import { IndexedDocument } from "../types"
+import weaviate, { WeaviateClient, ApiKey } from "weaviate-ts-client";
+import { VectorDatabase } from "./VectorDatabase.js"
+import { IndexedDocument } from "../types.js"
 
 export class WeaviateIndexer extends VectorDatabase {
-	private client: any
+	private client: WeaviateClient
 	private className: string
 
 	constructor(apiKey: string, endpoint: string, className: string) {
-		super()
-		this.client = weaviate.client({
+		super();
+		// C:\hapus\upwork\rag-systems\rag\node_modules\weaviate-ts-client\dist\index.d.ts
+		this.client = weaviate.default.client({
 			scheme: "https",
 			host: endpoint,
-			apiKey: new weaviate.ApiKey(apiKey),
-		})
-		this.className = className
+			apiKey: new ApiKey(apiKey), // Use the named import
+		});
+		this.className = className;
 	}
 
 	async add(documents: IndexedDocument[]): Promise<void> {
