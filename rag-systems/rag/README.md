@@ -6,6 +6,9 @@ Current Status: error for pinecone.
 
 # How to use
 
+First create a file called .env to store important values such as api keys for OpenAI and Pinecone.
+Then run `npm run rag` from where the `package.json` file exists.
+
 ## Create .env file
 
 Rename `env.sample` to `.env` and then provide corresponding values.
@@ -59,3 +62,6 @@ await pinecone.createIndex({
 
 ### v2
 https://weaviate.io/developers/weaviate/client-libraries/typescript/typescript-v2
+
+### v3
+https://weaviate.io/developers/weaviate/client-libraries/typescript/typescript-v3
