@@ -4,7 +4,7 @@ import { Chunker } from "./Chunker.js"
 export class TokenChunker extends Chunker {
 	private maxTokens: number
 
-	constructor(maxTokens: number = 100) {
+	constructor(maxTokens: number = parseInt(process.env.CHUNK_MAX_TOKENS || "100", 10)) {
 		super()
 		this.maxTokens = maxTokens
 	}

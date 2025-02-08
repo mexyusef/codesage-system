@@ -10,8 +10,8 @@ function transformDocument(doc: any): Document {
 }
 
 export const textSplitter = new RecursiveCharacterTextSplitter({
-  chunkSize: 1000,
-  chunkOverlap: 200,
+  chunkSize: parseInt(process.env.TEXT_SPLITTER_CHUNK_SIZE || "1000", 10),
+  chunkOverlap: parseInt(process.env.TEXT_SPLITTER_CHUNK_OVERLAP || "200", 10),
   separators: ["\n\n", "\n", " ", ""],
 });
 

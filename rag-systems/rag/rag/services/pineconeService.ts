@@ -12,6 +12,6 @@ export async function initializePineconeStore(
 
   return await PineconeStore.fromDocuments(docs, embeddings, {
     pineconeIndex: index,
-    namespace: "default",
+    namespace: process.env.PINECONE_NAMESPACE || "default",
   });
 }
