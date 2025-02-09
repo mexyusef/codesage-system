@@ -170,7 +170,7 @@ const HistoryView = ({ onDone }: HistoryViewProps) => {
 					<div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
 						<VSCodeTextField
 							style={{ width: "100%" }}
-							placeholder="Fuzzy search history..."
+							placeholder="Search history..."
 							value={searchQuery}
 							onInput={(e) => {
 								const newValue = (e.target as HTMLInputElement)?.value

@@ -199,7 +199,7 @@ const ApiOptions = ({ apiErrorMessage, modelIdErrorMessage }: ApiOptionsProps) =
 							marginTop: 3,
 							color: "var(--vscode-descriptionForeground)",
 						}}>
-						This key is stored locally and only used to make API requests from this extension.
+						Enter your API key above.
 						{!apiConfiguration?.apiKey && (
 							<VSCodeLink
 								href="https://console.anthropic.com/settings/keys"
@@ -235,7 +235,7 @@ const ApiOptions = ({ apiErrorMessage, modelIdErrorMessage }: ApiOptionsProps) =
 							marginTop: "5px",
 							color: "var(--vscode-descriptionForeground)",
 						}}>
-						This key is stored locally and only used to make API requests from this extension.
+						Enter your API key above.
 					</p>
 				</div>
 			)}
@@ -256,7 +256,7 @@ const ApiOptions = ({ apiErrorMessage, modelIdErrorMessage }: ApiOptionsProps) =
 							marginTop: 3,
 							color: "var(--vscode-descriptionForeground)",
 						}}>
-						This key is stored locally and only used to make API requests from this extension.
+						Enter your API key above.
 						{!apiConfiguration?.openAiNativeApiKey && (
 							<VSCodeLink
 								href="https://platform.openai.com/api-keys"
@@ -284,7 +284,7 @@ const ApiOptions = ({ apiErrorMessage, modelIdErrorMessage }: ApiOptionsProps) =
 							marginTop: 3,
 							color: "var(--vscode-descriptionForeground)",
 						}}>
-						This key is stored locally and only used to make API requests from this extension.
+						Enter your API key above.
 						{!apiConfiguration?.mistralApiKey && (
 							<VSCodeLink
 								href="https://console.mistral.ai/codestral/"
@@ -349,7 +349,7 @@ const ApiOptions = ({ apiErrorMessage, modelIdErrorMessage }: ApiOptionsProps) =
 							marginTop: "5px",
 							color: "var(--vscode-descriptionForeground)",
 						}}>
-						This key is stored locally and only used to make API requests from this extension.{" "}
+						Enter your API key above.{" "}
 						{/* {!apiConfiguration?.openRouterApiKey && (
 							<span style={{ color: "var(--vscode-charts-green)" }}>
 								(<span style={{ fontWeight: 500 }}>Note:</span> OpenRouter is recommended for high rate
@@ -553,7 +553,7 @@ const ApiOptions = ({ apiErrorMessage, modelIdErrorMessage }: ApiOptionsProps) =
 							marginTop: 3,
 							color: "var(--vscode-descriptionForeground)",
 						}}>
-						This key is stored locally and only used to make API requests from this extension.
+						Enter your API key above.
 						{!apiConfiguration?.geminiApiKey && (
 							<VSCodeLink
 								href="https://ai.google.dev/"
@@ -1151,7 +1151,7 @@ const ApiOptions = ({ apiErrorMessage, modelIdErrorMessage }: ApiOptionsProps) =
 							marginTop: "5px",
 							color: "var(--vscode-descriptionForeground)",
 						}}>
-						This key is stored locally and only used to make API requests from this extension.
+						Enter your API key above.
 						{!apiConfiguration?.deepSeekApiKey && (
 							<VSCodeLink
 								href="https://platform.deepseek.com/"
@@ -1313,7 +1313,7 @@ const ApiOptions = ({ apiErrorMessage, modelIdErrorMessage }: ApiOptionsProps) =
 							marginTop: 3,
 							color: "var(--vscode-descriptionForeground)",
 						}}>
-						This key is stored locally and only used to make API requests from this extension.
+						Enter your API key above.
 					</p>
 				</div>
 			)}

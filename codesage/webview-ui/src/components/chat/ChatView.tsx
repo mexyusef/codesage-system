@@ -297,7 +297,11 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 			text = text.trim()
 			if (text || images.length > 0) {
 				if (messages.length === 0) {
-					vscode.postMessage({ type: "newTask", text, images })
+					vscode.postMessage({
+						type: "newTask",
+						text,
+						images,
+					});
 				} else if (clineAsk) {
 					switch (clineAsk) {
 						case "followup":
@@ -999,7 +1003,7 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 					}}>
 					{showAnnouncement && <Announcement version={version} hideAnnouncement={hideAnnouncement} />}
 					<div style={{ padding: "0 20px", flexShrink: 0 }}>
-						<h2>Welcome to AI-driven code solver and generator?</h2>
+						<h2>CodeSage - Project explainer and generator</h2>
 						<p>
 							This VSCode extension is developed to be the best problem solver and code generator in the
 							market as an attempt to prepare the industry to embrace the age of AGI and the utopian world

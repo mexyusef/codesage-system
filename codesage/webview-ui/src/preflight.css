@@ -290,7 +290,8 @@ textarea,
 
 ::placeholder {
 	opacity: 1; /* 1 */
-	color: color-mix(in oklab, currentColor 50%, transparent); /* 2 */
+	font-size: 12px;
+	color: color-mix(in oklab, currentColor 30%, transparent); /* 2 */
 }
 
 /*

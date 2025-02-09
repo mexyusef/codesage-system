@@ -222,7 +222,7 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 				<div style={{ marginBottom: 40 }}>
 					<h3 style={{ color: "var(--vscode-foreground)", margin: "0 0 15px 0" }}>Auto-Approve Settings</h3>
 					<p style={{ fontSize: "12px", marginBottom: 15, color: "var(--vscode-descriptionForeground)" }}>
-						The following settings allow Roo to automatically perform operations without requiring approval.
+						The following settings allow CodeSage to automatically perform operations without requiring approval.
 						Enable these settings only if you fully trust the AI and understand the associated security
 						risks.
 					</p>
@@ -239,7 +239,7 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 								marginTop: "5px",
 								color: "var(--vscode-descriptionForeground)",
 							}}>
-							When enabled, Roo will automatically view directory contents and read files without
+							When enabled, CodeSage will automatically view directory contents and read files without
 							requiring you to click the Approve button.
 						</p>
 					</div>
@@ -539,7 +539,7 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 								marginTop: "5px",
 								color: "var(--vscode-descriptionForeground)",
 							}}>
-							When enabled, Roo will play sound effects for notifications and events.
+							When enabled, CodeSage will play sound effects for notifications and events.
 						</p>
 					</div>
 					{soundEnabled && (
@@ -635,7 +635,7 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 								marginTop: "5px",
 								color: "var(--vscode-descriptionForeground)",
 							}}>
-							When enabled, Roo will be able to edit files more quickly and will automatically reject
+							When enabled, CodeSage will be able to edit files more quickly and will automatically reject
 							truncated full-file writes. Works best with the latest Claude 3.5 Sonnet model.
 						</p>
 
@@ -712,12 +712,8 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 					}}>
 					<p style={{ wordWrap: "break-word", margin: 0, padding: 0 }}>
 						Questions and feedback please direct them to{" "}
-						<VSCodeLink href="https://github.com/mexyusef/codesage" style={{ display: "inline" }}>
-							github.com/mexyusef/codesage
-						</VSCodeLink>{" "}
-						or join{" "}
-						<VSCodeLink href="https://www.reddit.com/r/code-sage/" style={{ display: "inline" }}>
-							reddit.com/r/code-sage
+						<VSCodeLink href="https://github.com/mexyusef/codesage-system" style={{ display: "inline" }}>
+							github.com/mexyusef/codesage-system
 						</VSCodeLink>
 					</p>
 					<p style={{ fontStyle: "italic", margin: "10px 0 0 0", padding: 0, marginBottom: 100 }}>

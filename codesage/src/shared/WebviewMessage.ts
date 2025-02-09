@@ -83,27 +83,28 @@ export interface WebviewMessage {
 		| "deleteCustomMode"
 		| "setopenAiCustomModelInfo"
 		| "openCustomModesSettings"
-	text?: string
-	disabled?: boolean
-	askResponse?: ClineAskResponse
-	apiConfiguration?: ApiConfiguration
-	images?: string[]
-	bool?: boolean
-	value?: number
-	commands?: string[]
-	audioType?: AudioType
-	serverName?: string
-	toolName?: string
-	alwaysAllow?: boolean
-	mode?: Mode
-	promptMode?: PromptMode
-	customPrompt?: PromptComponent
-	dataUrls?: string[]
-	values?: Record<string, any>
-	query?: string
-	slug?: string
-	modeConfig?: ModeConfig
-	timeout?: number
+	text?: string;
+	disabled?: boolean;
+	askResponse?: ClineAskResponse;
+	apiConfiguration?: ApiConfiguration;
+	images?: string[];
+	bool?: boolean;
+	value?: number;
+	commands?: string[];
+	audioType?: AudioType;
+	serverName?: string;
+	toolName?: string;
+	alwaysAllow?: boolean;
+	mode?: Mode;
+	promptMode?: PromptMode;
+	customPrompt?: PromptComponent;
+	dataUrls?: string[];
+	values?: Record<string, any>;
+	query?: string;
+	slug?: string;
+	modeConfig?: ModeConfig;
+	timeout?: number;
+	ragMode?: boolean;
 }
 
 export type ClineAskResponse = "yesButtonClicked" | "noButtonClicked" | "messageResponse"

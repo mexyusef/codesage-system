@@ -184,6 +184,7 @@ const AutoApproveMenu = ({ style }: AutoApproveMenuProps) => {
 					/>
 				</div>
 				<div
+					className="glass-effect"
 					style={{
 						display: "flex",
 						alignItems: "center",
@@ -210,7 +211,7 @@ const AutoApproveMenu = ({ style }: AutoApproveMenuProps) => {
 						{enabledActionsList || "None"}
 					</span>
 					<span
-						className={`codicon codicon-chevron-${isExpanded ? "down" : "right"}`}
+						className={`codicon codicon-chevron-${isExpanded ? "down" : "right"} neon-green`}
 						style={{
 							flexShrink: 0,
 							marginLeft: isExpanded ? "2px" : "-2px",
