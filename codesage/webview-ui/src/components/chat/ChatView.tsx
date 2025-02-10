@@ -1068,7 +1068,9 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 							initialTopMostItemIndex={groupedMessages.length - 1}
 						/>
 					</div>
+
 					<AutoApproveMenu />
+
 					{showScrollToBottom ? (
 						<div
 							style={{
@@ -1123,6 +1125,7 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 					)}
 				</>
 			)}
+
 			<ChatTextArea
 				ref={textAreaRef}
 				inputValue={inputValue}
@@ -1142,6 +1145,7 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 				mode={mode}
 				setMode={setMode}
 			/>
+
 		</div>
 	)
 }

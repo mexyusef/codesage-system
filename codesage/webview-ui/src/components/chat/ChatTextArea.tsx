@@ -846,8 +846,7 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 						}}>
 
 	{/* RAG Mode Toggle Switch */}
-	<div
-	className="glass-effect neon-border-small"
+	<div className="toggle-switch-container glass-effect neon-border-small"
 		style={{
 			position: "relative",
 			display: "inline-block",
@@ -855,8 +854,8 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 			height: "20px",
 		}}
 	>
-		<input
-			type="checkbox"
+
+		<input type="checkbox"
 			checked={isRagModeEnabled}
 			onChange={handleRagModeToggle}
 			style={{
@@ -866,6 +865,7 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 			}}
 			id="rag-mode-toggle"
 		/>
+
 		<label
 			htmlFor="rag-mode-toggle"
 			style={{
@@ -894,27 +894,28 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 				}}
 			/>
 		</label>
+
 		{/* Tooltip */}
-		<span
+		{isRagModeEnabled && <span
 			style={{
 				position: "absolute",
-				top: "-24px",
+				top: "-20px",
 				left: "50%",
 				transform: "translateX(-50%)",
 				backgroundColor: "var(--vscode-editorWidget-background)",
 				color: "var(--vscode-editorWidget-foreground)",
-				padding: "4px 8px",
+				padding: "8px 4px",
 				borderRadius: "4px",
-				fontSize: "12px",
-				opacity: 0,
+				fontSize: "8px",
+				opacity: 0.75,
 				transition: "opacity 0.2s",
 				pointerEvents: "none",
 				whiteSpace: "nowrap",
+				zIndex: 1000000,
 			}}
 			className="tooltip"
-		>
-			{isRagModeEnabled ? "RAG Mode: Enabled" : "RAG Mode: Disabled"}
-		</span>
+		>RAG</span>}
+
 	</div>
 
 						<div style={{ display: "flex", alignItems: "center" }}>

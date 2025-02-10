@@ -420,3 +420,8 @@ h1 {
 	background-repeat: no-repeat;
 	background-size: cover;
 }
+
+.toggle-switch-container:hover .tooltip {
+	opacity: 1; /* Show tooltip on hover */
+	/* border: 4px solid #ff00ff; */
+}
