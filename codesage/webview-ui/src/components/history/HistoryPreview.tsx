@@ -30,7 +30,16 @@ const HistoryPreview = ({ showHistoryView }: HistoryPreviewProps) => {
 	}
 
 	return (
-		<div style={{ flexShrink: 0 }}>
+		<div
+			className="glass-effect"
+			style={{ 
+				marginLeft: "10px",
+				marginRight: "10px",
+				marginTop: "5px",
+				marginBottom: "5px",
+				flexShrink: 0,
+			}}
+			>
 			<style>
 				{`
 					.history-preview-item {
@@ -77,10 +86,10 @@ const HistoryPreview = ({ showHistoryView }: HistoryPreviewProps) => {
 					.map((item) => (
 						<div
 							key={item.id}
-							className="history-preview-item"
+							className="history-preview-item glass-effect"
 							onClick={() => handleHistorySelect(item.id)}>
-							<div style={{ padding: "12px" }}>
-								<div style={{ marginBottom: "8px" }}>
+							<div style={{ padding: "10px" }}>
+								<div style={{ marginBottom: "4px" }}>
 									<span
 										style={{
 											color: "var(--vscode-descriptionForeground)",
@@ -95,7 +104,7 @@ const HistoryPreview = ({ showHistoryView }: HistoryPreviewProps) => {
 									style={{
 										fontSize: "var(--vscode-font-size)",
 										color: "var(--vscode-descriptionForeground)",
-										marginBottom: "8px",
+										marginBottom: "4px",
 										display: "-webkit-box",
 										WebkitLineClamp: 3,
 										WebkitBoxOrient: "vertical",
@@ -130,7 +139,11 @@ const HistoryPreview = ({ showHistoryView }: HistoryPreviewProps) => {
 							</div>
 						</div>
 					))}
-				<div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+
+				<div
+					// className="glass-effect"
+					style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+					>
 					<VSCodeButton
 						appearance="icon"
 						onClick={() => showHistoryView()}
@@ -146,6 +159,7 @@ const HistoryPreview = ({ showHistoryView }: HistoryPreviewProps) => {
 						</div>
 					</VSCodeButton>
 				</div>
+
 			</div>
 		</div>
 	)

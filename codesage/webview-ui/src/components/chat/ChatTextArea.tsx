@@ -30,6 +30,8 @@ interface ChatTextAreaProps {
 	onHeightChange?: (height: number) => void
 	mode: Mode
 	setMode: (value: Mode) => void
+	isRagModeEnabled: boolean;
+	onRagModeToggle: () => void;
 }
 
 const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
@@ -47,6 +49,8 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 			onHeightChange,
 			mode,
 			setMode,
+			isRagModeEnabled,
+			onRagModeToggle,
 		},
 		ref,
 	) => {
@@ -104,10 +108,10 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 		const contextMenuContainerRef = useRef<HTMLDivElement>(null)
 		const [isEnhancingPrompt, setIsEnhancingPrompt] = useState(false)
 		const [isFocused, setIsFocused] = useState(false)
-		const [isRagModeEnabled, setIsRagModeEnabled] = useState(false);
-		const handleRagModeToggle = useCallback(() => {
-			setIsRagModeEnabled((prev) => !prev);
-		}, []);
+		// const [isRagModeEnabled, setIsRagModeEnabled] = useState(false);
+		// const handleRagModeToggle = useCallback(() => {
+		// 	setIsRagModeEnabled((prev) => !prev);
+		// }, []);
 
 		// Fetch git commits when Git is selected or when typing a hash
 		useEffect(() => {
@@ -510,15 +514,15 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 		)
 
 		const selectStyle = {
-			fontSize: "11px",
+			fontSize: "10px",
 			cursor: textAreaDisabled ? "not-allowed" : "pointer",
 			backgroundColor: "transparent",
 			border: "none",
 			color: "var(--vscode-foreground)",
 			opacity: textAreaDisabled ? 0.5 : 0.8,
 			outline: "none",
-			paddingLeft: "20px",
-			paddingRight: "6px",
+			paddingLeft: "15px",
+			paddingRight: "5px",
 			WebkitAppearance: "none" as const,
 			MozAppearance: "none" as const,
 			appearance: "none" as const,
@@ -737,7 +741,13 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 							alignItems: "center",
 						}}>
 						{/* code dropdown */}
-						<div style={{ position: "relative", display: "inline-block" }}>
+						<div
+							className="glass-effect"
+							style={{
+								position: "relative",
+								display: "inline-block",
+								marginRight: "4px",
+							}}>
 							<select
 								value={mode}
 								disabled={textAreaDisabled}
@@ -782,6 +792,7 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 
 						{/* default dropdown */}
 						<div
+							className="glass-effect"
 							style={{
 								position: "relative",
 								display: "inline-block",
@@ -789,6 +800,7 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 								minWidth: 0,
 								maxWidth: "150px",
 								overflow: "hidden",
+								marginRight: "4px",
 							}}>
 							<select
 								value={currentApiConfigName || ""}
@@ -857,7 +869,7 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 
 		<input type="checkbox"
 			checked={isRagModeEnabled}
-			onChange={handleRagModeToggle}
+			onChange={onRagModeToggle}
 			style={{
 				opacity: 0,
 				width: 0,

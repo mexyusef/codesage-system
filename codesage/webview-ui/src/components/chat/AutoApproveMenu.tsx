@@ -183,6 +183,7 @@ const AutoApproveMenu = ({ style }: AutoApproveMenuProps) => {
 						}}
 					/>
 				</div>
+
 				<div
 					className="glass-effect"
 					style={{
@@ -218,6 +219,7 @@ const AutoApproveMenu = ({ style }: AutoApproveMenuProps) => {
 						}}
 					/>
 				</div>
+
 			</div>
 			{isExpanded && (
 				<div style={{ padding: "0" }}>

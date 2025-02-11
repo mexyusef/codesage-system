@@ -551,7 +551,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			async (message: WebviewMessage) => {
 				switch (message.type) {
 					case "webviewDidLaunch":
-						// Load custom modes first
+						console.log("🔔 webviewDidLaunch");
 						const customModes = await this.customModesManager.getCustomModes()
 						await this.updateGlobalState("customModes", customModes)
 
@@ -655,103 +655,176 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 
 						this.isViewLaunched = true
 						break
-					case "newTask":
-						// Code that should run in response to the hello message command
-						//vscode.window.showInformationMessage(message.text!)
 
-						// Send a message to our webview.
-						// You can send any JSON serializable data.
-						// Could also do this in extension .ts
-						//this.postMessageToWebview({ type: "text", text: `Extension: ${Date.now()}` })
+					case "newTask":
+						console.log("🔔 newTask:", JSON.stringify(message));
+						// vscode.window.showInformationMessage(message.text!)
+						// 🔔 newTask: {"type":"newTask","text":"create .gitignore here in this directory","images":[],"ragMode":true}
+
 						// initializing new instance of Cline will make sure that any agentically running promises in old instance don't affect our new task. this essentially creates a fresh slate for the new task
 						await this.initClineWithTask(message.text, message.images)
 						break
+					case "askResponse":
+						console.log("🔔 askResponse:", JSON.stringify(message));
+
+						// 🔔 askResponse: {"type":"askResponse","askResponse":"yesButtonClicked"}
+						// 🔔 askResponse: {"type":"askResponse","askResponse":"messageResponse","text":"add more information in the README.md","images":[],"ragMode":true}
+						// 🔔 askResponse: {"type":"askResponse","askResponse":"yesButtonClicked"}
+						// 🔔 askResponse: {"type":"askResponse","askResponse":"yesButtonClicked"}
+
+						this.cline?.handleWebviewAskResponse(message.askResponse!, message.text, message.images)
+						break
+					case "enhancePrompt":
+						console.log("🔔 enhancePrompt");
+						if (message.text) {
+							try {
+								const {
+									apiConfiguration,
+									customSupportPrompts,
+									listApiConfigMeta,
+									enhancementApiConfigId,
+								} = await this.getState()
+
+								// Try to get enhancement config first, fall back to current config
+								let configToUse: ApiConfiguration = apiConfiguration
+								if (enhancementApiConfigId) {
+									const config = listApiConfigMeta?.find((c) => c.id === enhancementApiConfigId)
+									if (config?.name) {
+										const loadedConfig = await this.configManager.loadConfig(config.name)
+										if (loadedConfig.apiProvider) {
+											configToUse = loadedConfig
+										}
+									}
+								}
+								const enhancedPrompt = await singleCompletionHandler(
+									configToUse,
+									supportPrompt.create(
+										"ENHANCE",
+										{
+											userInput: message.text,
+										},
+										customSupportPrompts,
+									),
+								)
+								await this.postMessageToWebview({
+									type: "enhancedPrompt",
+									text: enhancedPrompt,
+								})
+							} catch (error) {
+								this.outputChannel.appendLine(`Error enhancing prompt: ${JSON.stringify(error, Object.getOwnPropertyNames(error), 2)}`,)
+								vscode.window.showErrorMessage("Failed to enhance prompt")
+								await this.postMessageToWebview({
+									type: "enhancedPrompt",
+								})
+							}
+						}
+						break
+
 					case "apiConfiguration":
+						console.log("🔔 apiConfiguration");
 						if (message.apiConfiguration) {
 							await this.updateApiConfiguration(message.apiConfiguration)
 						}
 						await this.postStateToWebview()
 						break
 					case "customInstructions":
+						console.log("🔔 customInstructions");
 						await this.updateCustomInstructions(message.text)
 						break
 					case "alwaysAllowReadOnly":
+						console.log("🔔 alwaysAllowReadOnly");
 						await this.updateGlobalState("alwaysAllowReadOnly", message.bool ?? undefined)
 						await this.postStateToWebview()
 						break
 					case "alwaysAllowWrite":
+						console.log("🔔 alwaysAllowWrite");
 						await this.updateGlobalState("alwaysAllowWrite", message.bool ?? undefined)
 						await this.postStateToWebview()
 						break
 					case "alwaysAllowExecute":
+						console.log("🔔 alwaysAllowExecute");
 						await this.updateGlobalState("alwaysAllowExecute", message.bool ?? undefined)
 						await this.postStateToWebview()
 						break
 					case "alwaysAllowBrowser":
+						console.log("🔔 alwaysAllowBrowser");
 						await this.updateGlobalState("alwaysAllowBrowser", message.bool ?? undefined)
 						await this.postStateToWebview()
 						break
 					case "alwaysAllowMcp":
+						console.log("🔔 alwaysAllowMcp");
 						await this.updateGlobalState("alwaysAllowMcp", message.bool)
 						await this.postStateToWebview()
 						break
 					case "alwaysAllowModeSwitch":
+						console.log("🔔 alwaysAllowModeSwitch");
 						await this.updateGlobalState("alwaysAllowModeSwitch", message.bool)
 						await this.postStateToWebview()
 						break
-					case "askResponse":
-						this.cline?.handleWebviewAskResponse(message.askResponse!, message.text, message.images)
-						break
+
 					case "clearTask":
-						// newTask will start a new task with a given task text, while clear task resets the current session and allows for a new task to be started
+						console.log("🔔 clearTask");
 						await this.clearTask()
 						await this.postStateToWebview()
 						break
 					case "didShowAnnouncement":
+						console.log("🔔 didShowAnnouncement");
 						await this.updateGlobalState("lastShownAnnouncementId", this.latestAnnouncementId)
 						await this.postStateToWebview()
 						break
 					case "selectImages":
+						console.log("🔔 selectImages");
 						const images = await selectImages()
 						await this.postMessageToWebview({ type: "selectedImages", images })
 						break
 					case "exportCurrentTask":
+						console.log("🔔 exportCurrentTask");
 						const currentTaskId = this.cline?.taskId
 						if (currentTaskId) {
 							this.exportTaskWithId(currentTaskId)
 						}
 						break
 					case "showTaskWithId":
+						console.log("🔔 showTaskWithId");
 						this.showTaskWithId(message.text!)
 						break
 					case "deleteTaskWithId":
+						console.log("🔔 deleteTaskWithId");
 						this.deleteTaskWithId(message.text!)
 						break
 					case "exportTaskWithId":
+						console.log("🔔 exportTaskWithId");
 						this.exportTaskWithId(message.text!)
 						break
 					case "resetState":
+						console.log("🔔 resetState");
 						await this.resetState()
 						break
 					case "requestOllamaModels":
+						console.log("🔔 requestOllamaModels");
 						const ollamaModels = await this.getOllamaModels(message.text)
 						this.postMessageToWebview({ type: "ollamaModels", ollamaModels })
 						break
 					case "requestLmStudioModels":
+						console.log("🔔 requestLmStudioModels");
 						const lmStudioModels = await this.getLmStudioModels(message.text)
 						this.postMessageToWebview({ type: "lmStudioModels", lmStudioModels })
 						break
 					case "requestVsCodeLmModels":
+						console.log("🔔 requestVsCodeLmModels");
 						const vsCodeLmModels = await this.getVsCodeLmModels()
 						this.postMessageToWebview({ type: "vsCodeLmModels", vsCodeLmModels })
 						break
 					case "refreshGlamaModels":
+						console.log("🔔 refreshGlamaModels");
 						await this.refreshGlamaModels()
 						break
 					case "refreshOpenRouterModels":
+						console.log("🔔 refreshOpenRouterModels");
 						await this.refreshOpenRouterModels()
 						break
 					case "refreshOpenAiModels":
+						console.log("🔔 refreshOpenAiModels");
 						if (message?.values?.baseUrl && message?.values?.apiKey) {
 							const openAiModels = await this.getOpenAiModels(
 								message?.values?.baseUrl,
@@ -761,15 +834,19 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						}
 						break
 					case "openImage":
+						console.log("🔔 openImage");
 						openImage(message.text!)
 						break
 					case "openFile":
+						console.log("🔔 openFile");
 						openFile(message.text!, message.values as { create?: boolean; content?: string })
 						break
 					case "openMention":
+						console.log("🔔 openMention");
 						openMention(message.text)
 						break
 					case "cancelTask":
+						console.log("🔔 cancelTask");
 						if (this.cline) {
 							const { historyItem } = await this.getTaskWithId(this.cline.taskId)
 							this.cline.abortTask()
@@ -787,9 +864,9 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 							await this.initClineWithHistoryItem(historyItem) // clears task again, so we need to abortTask manually above
 							// await this.postStateToWebview() // new Cline instance will post state when it's ready. having this here sent an empty messages array to webview leading to virtuoso having to reload the entire list
 						}
-
 						break
 					case "allowedCommands":
+						console.log("🔔 allowedCommands");
 						await this.context.globalState.update("allowedCommands", message.commands)
 						// Also update workspace settings
 						await vscode.workspace
@@ -797,6 +874,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 							.update("allowedCommands", message.commands, vscode.ConfigurationTarget.Global)
 						break
 					case "openMcpSettings": {
+						console.log("🔔 openMcpSettings");
 						const mcpSettingsFilePath = await this.mcpHub?.getMcpSettingsFilePath()
 						if (mcpSettingsFilePath) {
 							openFile(mcpSettingsFilePath)
@@ -804,6 +882,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						break
 					}
 					case "openCustomModesSettings": {
+						console.log("🔔 openCustomModesSettings");
 						const customModesFilePath = await this.customModesManager.getCustomModesFilePath()
 						if (customModesFilePath) {
 							openFile(customModesFilePath)
@@ -811,6 +890,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						break
 					}
 					case "restartMcpServer": {
+						console.log("🔔 restartMcpServer");
 						try {
 							await this.mcpHub?.restartConnection(message.text!)
 						} catch (error) {
@@ -821,6 +901,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						break
 					}
 					case "toggleToolAlwaysAllow": {
+						console.log("🔔 toggleToolAlwaysAllow");
 						try {
 							await this.mcpHub?.toggleToolAlwaysAllow(
 								message.serverName!,
@@ -835,6 +916,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						break
 					}
 					case "toggleMcpServer": {
+						console.log("🔔 toggleMcpServer");
 						try {
 							await this.mcpHub?.toggleServerDisabled(message.serverName!, message.disabled!)
 						} catch (error) {
@@ -845,74 +927,90 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						break
 					}
 					case "mcpEnabled":
+						console.log("🔔 mcpEnabled");
 						const mcpEnabled = message.bool ?? true
 						await this.updateGlobalState("mcpEnabled", mcpEnabled)
 						await this.postStateToWebview()
 						break
 					case "enableMcpServerCreation":
+						console.log("🔔 enableMcpServerCreation");
 						await this.updateGlobalState("enableMcpServerCreation", message.bool ?? true)
 						await this.postStateToWebview()
 						break
 					case "playSound":
+						console.log("🔔 playSound");
 						if (message.audioType) {
 							const soundPath = path.join(this.context.extensionPath, "audio", `${message.audioType}.wav`)
 							playSound(soundPath)
 						}
 						break
 					case "soundEnabled":
+						console.log("🔔 soundEnabled");
 						const soundEnabled = message.bool ?? true
 						await this.updateGlobalState("soundEnabled", soundEnabled)
 						setSoundEnabled(soundEnabled) // Add this line to update the sound utility
 						await this.postStateToWebview()
 						break
 					case "soundVolume":
+						console.log("🔔 soundVolume");
 						const soundVolume = message.value ?? 0.5
 						await this.updateGlobalState("soundVolume", soundVolume)
 						setSoundVolume(soundVolume)
 						await this.postStateToWebview()
 						break
 					case "diffEnabled":
+						console.log("🔔 diffEnabled");
 						const diffEnabled = message.bool ?? true
 						await this.updateGlobalState("diffEnabled", diffEnabled)
 						await this.postStateToWebview()
 						break
 					case "browserViewportSize":
+						console.log("🔔 browserViewportSize");
 						const browserViewportSize = message.text ?? "900x600"
 						await this.updateGlobalState("browserViewportSize", browserViewportSize)
 						await this.postStateToWebview()
 						break
 					case "fuzzyMatchThreshold":
+						console.log("🔔 fuzzyMatchThreshold");
 						await this.updateGlobalState("fuzzyMatchThreshold", message.value)
 						await this.postStateToWebview()
 						break
 					case "alwaysApproveResubmit":
+						console.log("🔔 alwaysApproveResubmit");
 						await this.updateGlobalState("alwaysApproveResubmit", message.bool ?? false)
 						await this.postStateToWebview()
 						break
 					case "requestDelaySeconds":
+						console.log("🔔 requestDelaySeconds");
 						await this.updateGlobalState("requestDelaySeconds", message.value ?? 5)
 						await this.postStateToWebview()
 						break
 					case "rateLimitSeconds":
+						console.log("🔔 rateLimitSeconds");
 						await this.updateGlobalState("rateLimitSeconds", message.value ?? 0)
 						await this.postStateToWebview()
 						break
 					case "preferredLanguage":
+						console.log("🔔 preferredLanguage");
 						await this.updateGlobalState("preferredLanguage", message.text)
 						await this.postStateToWebview()
 						break
 					case "writeDelayMs":
+						console.log("🔔 writeDelayMs");
 						await this.updateGlobalState("writeDelayMs", message.value)
 						await this.postStateToWebview()
 						break
 					case "terminalOutputLineLimit":
+						console.log("🔔 terminalOutputLineLimit");
 						await this.updateGlobalState("terminalOutputLineLimit", message.value)
 						await this.postStateToWebview()
 						break
 					case "mode":
+						console.log("🔔 mode");
 						await this.handleModeSwitch(message.text as Mode)
 						break
 					case "updateSupportPrompt":
+						console.log("🔔 updateSupportPrompt");
 						try {
 							if (Object.keys(message?.values ?? {}).length === 0) {
 								return
@@ -935,6 +1033,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						}
 						break
 					case "resetSupportPrompt":
+						console.log("🔔 resetSupportPrompt");
 						try {
 							if (!message?.text) {
 								return
@@ -959,6 +1058,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						}
 						break
 					case "updatePrompt":
+						console.log("🔔 updatePrompt");
 						if (message.promptMode && message.customPrompt !== undefined) {
 							const existingPrompts = (await this.getGlobalState("customModePrompts")) || {}
 
@@ -985,6 +1085,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						}
 						break
 					case "deleteMessage": {
+						console.log("🔔 deleteMessage");
 						const answer = await vscode.window.showInformationMessage(
 							"What would you like to delete?",
 							{ modal: true },
@@ -1070,66 +1171,22 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						break
 					}
 					case "screenshotQuality":
+						console.log("🔔 screenshotQuality");
 						await this.updateGlobalState("screenshotQuality", message.value)
 						await this.postStateToWebview()
 						break
 					case "enhancementApiConfigId":
+						console.log("🔔 enhancementApiConfigId");
 						await this.updateGlobalState("enhancementApiConfigId", message.text)
 						await this.postStateToWebview()
 						break
 					case "autoApprovalEnabled":
+						console.log("🔔 autoApprovalEnabled");
 						await this.updateGlobalState("autoApprovalEnabled", message.bool ?? false)
 						await this.postStateToWebview()
 						break
-					case "enhancePrompt":
-						if (message.text) {
-							try {
-								const {
-									apiConfiguration,
-									customSupportPrompts,
-									listApiConfigMeta,
-									enhancementApiConfigId,
-								} = await this.getState()
-
-								// Try to get enhancement config first, fall back to current config
-								let configToUse: ApiConfiguration = apiConfiguration
-								if (enhancementApiConfigId) {
-									const config = listApiConfigMeta?.find((c) => c.id === enhancementApiConfigId)
-									if (config?.name) {
-										const loadedConfig = await this.configManager.loadConfig(config.name)
-										if (loadedConfig.apiProvider) {
-											configToUse = loadedConfig
-										}
-									}
-								}
-
-								const enhancedPrompt = await singleCompletionHandler(
-									configToUse,
-									supportPrompt.create(
-										"ENHANCE",
-										{
-											userInput: message.text,
-										},
-										customSupportPrompts,
-									),
-								)
-
-								await this.postMessageToWebview({
-									type: "enhancedPrompt",
-									text: enhancedPrompt,
-								})
-							} catch (error) {
-								this.outputChannel.appendLine(
-									`Error enhancing prompt: ${JSON.stringify(error, Object.getOwnPropertyNames(error), 2)}`,
-								)
-								vscode.window.showErrorMessage("Failed to enhance prompt")
-								await this.postMessageToWebview({
-									type: "enhancedPrompt",
-								})
-							}
-						}
-						break
 					case "getSystemPrompt":
+						console.log("🔔 getSystemPrompt");
 						try {
 							const {
 								apiConfiguration,
@@ -1186,6 +1243,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						}
 						break
 					case "searchCommits": {
+						console.log("🔔 searchCommits");
 						const cwd = vscode.workspace.workspaceFolders?.map((folder) => folder.uri.fsPath).at(0)
 						if (cwd) {
 							try {
@@ -1204,6 +1262,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						break
 					}
 					case "upsertApiConfiguration":
+						console.log("🔔 upsertApiConfiguration");
 						if (message.text && message.apiConfiguration) {
 							try {
 								await this.configManager.saveConfig(message.text, message.apiConfiguration)
@@ -1225,6 +1284,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						}
 						break
 					case "renameApiConfiguration":
+						console.log("🔔 renameApiConfiguration");
 						if (message.values && message.apiConfiguration) {
 							try {
 								const { oldName, newName } = message.values
@@ -1254,6 +1314,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						}
 						break
 					case "loadApiConfiguration":
+						console.log("🔔 loadApiConfiguration");
 						if (message.text) {
 							try {
 								const apiConfig = await this.configManager.loadConfig(message.text)
@@ -1275,6 +1336,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						}
 						break
 					case "deleteApiConfiguration":
+						console.log("🔔 deleteApiConfiguration");
 						if (message.text) {
 							const answer = await vscode.window.showInformationMessage(
 								"Are you sure you want to delete this configuration profile?",
@@ -1313,6 +1375,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						}
 						break
 					case "getListApiConfiguration":
+						console.log("🔔 getListApiConfiguration");
 						try {
 							const listApiConfig = await this.configManager.listConfig()
 							await this.updateGlobalState("listApiConfigMeta", listApiConfig)
@@ -1325,6 +1388,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						}
 						break
 					case "updateExperimental": {
+						console.log("🔔 updateExperimental");
 						if (!message.values) {
 							break
 						}
@@ -1347,6 +1411,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						break
 					}
 					case "updateMcpTimeout":
+						console.log("🔔 updateMcpTimeout");
 						if (message.serverName && typeof message.timeout === "number") {
 							try {
 								await this.mcpHub?.updateServerTimeout(message.serverName, message.timeout)
@@ -1359,6 +1424,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						}
 						break
 					case "updateCustomMode":
+						console.log("🔔 updateCustomMode");
 						if (message.modeConfig) {
 							await this.customModesManager.updateCustomMode(message.modeConfig.slug, message.modeConfig)
 							// Update state after saving the mode
@@ -1369,6 +1435,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						}
 						break
 					case "deleteCustomMode":
+						console.log("🔔 deleteCustomMode");
 						if (message.slug) {
 							const answer = await vscode.window.showInformationMessage(
 								"Are you sure you want to delete this custom mode?",

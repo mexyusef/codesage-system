@@ -202,6 +202,7 @@ export const ExtensionStateContextProvider: React.FC<{ children: React.ReactNode
 				}
 				case "partialMessage": {
 					const partialMessage = message.partialMessage!
+					console.log(`\n\nExtensionStateContext.tsx partialMessage = ${JSON.stringify(partialMessage, null, 2)}\n\n`);
 					setState((prevState) => {
 						// worth noting it will never be possible for a more up-to-date message to be sent here or in normal messages post since the presentAssistantContent function uses lock
 						const lastIndex = findLastIndex(prevState.clineMessages, (msg) => msg.ts === partialMessage.ts)

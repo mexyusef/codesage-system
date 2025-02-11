@@ -28,6 +28,7 @@ import TaskHeader from "./TaskHeader"
 import AutoApproveMenu from "./AutoApproveMenu"
 import { AudioType } from "../../../../src/shared/WebviewMessage"
 import { validateCommand } from "../../utils/command-validation"
+import RagSettingsMenu from "./RagSettingsMenu"
 
 interface ChatViewProps {
 	isHidden: boolean
@@ -88,6 +89,13 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 	// (since it relies on the content of these messages, we are deep comparing. i.e. the button state after hitting button sets enableButtons to false, and this effect otherwise would have to true again even if messages didn't change
 	const lastMessage = useMemo(() => messages.at(-1), [messages])
 	const secondLastMessage = useMemo(() => messages.at(-2), [messages])
+
+	// Add RAG mode state
+	const [isRagModeEnabled, setIsRagModeEnabled] = useState(false);
+	// Add RAG mode toggle function
+	const handleRagModeToggle = useCallback(() => {
+		setIsRagModeEnabled((prev) => !prev);
+	}, []);
 
 	function playSound(audioType: AudioType) {
 		vscode.postMessage({ type: "playSound", audioType })
@@ -301,6 +309,7 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 						type: "newTask",
 						text,
 						images,
+						ragMode: isRagModeEnabled,
 					});
 				} else if (clineAsk) {
 					switch (clineAsk) {
@@ -319,6 +328,7 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 								askResponse: "messageResponse",
 								text,
 								images,
+								ragMode: isRagModeEnabled,
 							})
 							break
 						// there is no other case that a textfield should be enabled
@@ -336,7 +346,7 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 				disableAutoScrollRef.current = false
 			}
 		},
-		[messages.length, clineAsk],
+		[messages.length, clineAsk, isRagModeEnabled],
 	)
 
 	const handleSetChatBoxMessage = useCallback(
@@ -1014,29 +1024,30 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 				</div>
 			)}
 
-			{/* 
-			// Flex layout explanation:
-			// 1. Content div above uses flex: "1 1 0" to:
-			//    - Grow to fill available space (flex-grow: 1) 
-			//    - Shrink when AutoApproveMenu needs space (flex-shrink: 1)
-			//    - Start from zero size (flex-basis: 0) to ensure proper distribution
-			//    minHeight: 0 allows it to shrink below its content height
-			//
-			// 2. AutoApproveMenu uses flex: "0 1 auto" to:
-			//    - Not grow beyond its content (flex-grow: 0)
-			//    - Shrink when viewport is small (flex-shrink: 1) 
-			//    - Use its content size as basis (flex-basis: auto)
-			//    This ensures it takes its natural height when there's space
-			//    but becomes scrollable when the viewport is too small
-			*/}
 			{!task && (
-				<AutoApproveMenu
-					style={{
-						marginBottom: -2,
-						flex: "0 1 auto", // flex-grow: 0, flex-shrink: 1, flex-basis: auto
-						minHeight: 0,
-					}}
-				/>
+
+isRagModeEnabled ? (
+	<RagSettingsMenu
+		style={{
+			// marginBottom: -2,
+			marginTop: "2px",
+			marginRight: "10px",
+			marginBottom: "2px",
+			marginLeft: "10px",
+			flex: "0 1 auto",
+			minHeight: 0,
+		}}
+	/>
+) : (
+	<AutoApproveMenu
+		style={{
+			marginBottom: -2,
+			flex: "0 1 auto",
+			minHeight: 0,
+		}}
+	/>
+)
+
 			)}
 
 			{task && (
@@ -1144,6 +1155,8 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 				}}
 				mode={mode}
 				setMode={setMode}
+				isRagModeEnabled={isRagModeEnabled}
+				onRagModeToggle={handleRagModeToggle}
 			/>
 
 		</div>
@@ -1151,8 +1164,11 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 }
 
 const ScrollToBottomButton = styled.div`
+  background: rgba(255, 255, 255, 0.1); /* Semi-transparent background */
+  backdrop-filter: blur(10px); /* Frosted glass effect */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
 	background-color: color-mix(in srgb, var(--vscode-toolbar-hoverBackground) 55%, transparent);
-	border-radius: 3px;
+	border-radius: 10px;
 	overflow: hidden;
 	cursor: pointer;
 	display: flex;
@@ -1162,10 +1178,14 @@ const ScrollToBottomButton = styled.div`
 	height: 25px;
 
 	&:hover {
+		background: rgba(255, 255, 255, 0.2); /* Slightly more opaque on hover */
+    transform: translateY(-2px); /* Lift effect */
 		background-color: color-mix(in srgb, var(--vscode-toolbar-hoverBackground) 90%, transparent);
 	}
 
 	&:active {
+		background: rgba(255, 255, 255, 0.1); /* Return to original opacity */
+    transform: translateY(0); /* Reset position */
 		background-color: color-mix(in srgb, var(--vscode-toolbar-hoverBackground) 70%, transparent);
 	}
 `
