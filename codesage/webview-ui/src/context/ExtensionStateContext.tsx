@@ -28,6 +28,7 @@ export interface ExtensionStateContextType extends ExtensionState {
 	mcpServers: McpServer[]
 	filePaths: string[]
 	openedTabs: Array<{ label: string; isActive: boolean; path?: string }>
+	setState: React.Dispatch<React.SetStateAction<ExtensionState>>;
 	setApiConfiguration: (config: ApiConfiguration) => void
 	setCustomInstructions: (value?: string) => void
 	setAlwaysAllowReadOnly: (value: boolean) => void
@@ -266,6 +267,7 @@ export const ExtensionStateContextProvider: React.FC<{ children: React.ReactNode
 		mcpServers,
 		filePaths,
 		openedTabs,
+		setState,
 		soundVolume: state.soundVolume,
 		fuzzyMatchThreshold: state.fuzzyMatchThreshold,
 		writeDelayMs: state.writeDelayMs,

@@ -1,5 +1,5 @@
-import { IndexedDocument } from "../types"
-import { VectorDatabase } from "./VectorDatabase"
+import { IndexedDocument } from "../types.js"
+import { VectorDatabase } from "./VectorDatabase.js"
 import { Pinecone } from "@pinecone-database/pinecone"
 
 export class PineconeIndexer extends VectorDatabase {

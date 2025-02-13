@@ -83,6 +83,8 @@ export interface WebviewMessage {
 		| "deleteCustomMode"
 		| "setopenAiCustomModelInfo"
 		| "openCustomModesSettings"
+		| "updateRagConfig"
+		| "ragQuery"
 	text?: string;
 	disabled?: boolean;
 	askResponse?: ClineAskResponse;
@@ -105,6 +107,8 @@ export interface WebviewMessage {
 	modeConfig?: ModeConfig;
 	timeout?: number;
 	ragMode?: boolean;
+	ragConfig?: Record<string, string>;
+	ragQuery?: string;
 }
 
 export type ClineAskResponse = "yesButtonClicked" | "noButtonClicked" | "messageResponse"

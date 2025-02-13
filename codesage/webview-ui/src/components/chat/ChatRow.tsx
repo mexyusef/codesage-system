@@ -611,6 +611,12 @@ export const ChatRowContent = ({
 							<Markdown markdown={message.text} partial={message.partial} />
 						</div>
 					)
+				case "rag_response":
+					return (
+							<div className="chat-row rag-response">
+									{message.text}
+							</div>
+					);
 				case "user_feedback":
 					return (
 						<div

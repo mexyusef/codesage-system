@@ -42,6 +42,7 @@ export interface ExtensionMessage {
 		| "autoApprovalEnabled"
 		| "updateCustomMode"
 		| "deleteCustomMode"
+		| "ragConfigUpdated"
 	text?: string
 	action?:
 		| "chatButtonClicked"
@@ -72,6 +73,7 @@ export interface ExtensionMessage {
 	mode?: Mode
 	customMode?: ModeConfig
 	slug?: string
+	ragMessage?: string;
 }
 
 export interface ApiConfigMeta {
@@ -145,6 +147,7 @@ export type ClineAsk =
 	| "mistake_limit_reached"
 	| "browser_action_launch"
 	| "use_mcp_server"
+	| "rag_query"
 
 export type ClineSay =
 	| "task"
@@ -168,6 +171,7 @@ export type ClineSay =
 	| "mcp_server_response"
 	| "new_task_started"
 	| "new_task"
+	| "rag_response"
 
 export interface ClineSayTool {
 	tool:

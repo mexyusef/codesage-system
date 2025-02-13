@@ -1,12 +1,14 @@
-import { Chunk } from "../types"
-import { Chunker } from "./Chunker"
+import { getRagSettings } from "../../ragSettings.js";
+import { Chunk } from "../types.js"
+import { Chunker } from "./Chunker.js"
 
 export class SentenceChunker extends Chunker {
 	private maxTokens: number
 
-	constructor(maxTokens: number = 100) {
+	constructor(maxTokens?: number) {
 		super()
-		this.maxTokens = maxTokens
+		const ragSettings = getRagSettings();
+		this.maxTokens = maxTokens ?? ragSettings.CHUNK_MAX_TOKENS;
 	}
 
 	chunk(content: string): Chunk[] {

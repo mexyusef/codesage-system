@@ -1,6 +1,6 @@
 import axios from "axios"
-import { Embedder } from "./Embedder"
-import { Embedding } from "../types"
+import { Embedder } from "./Embedder.js"
+import { Embedding } from "../types.js"
 
 export class HuggingFaceEmbedder extends Embedder {
 	private apiKey: string

@@ -10,9 +10,10 @@ import {
 	ClineSayBrowserAction,
 	ClineSayTool,
 	ExtensionMessage,
+	ExtensionState,
 } from "../../../../src/shared/ExtensionMessage"
 import { McpServer, McpTool } from "../../../../src/shared/mcp"
-import { findLast } from "../../../../src/shared/array"
+import { findLast, findLastIndex } from "../../../../src/shared/array"
 import { combineApiRequests } from "../../../../src/shared/combineApiRequests"
 import { combineCommandSequences } from "../../../../src/shared/combineCommandSequences"
 import { getApiMetrics } from "../../../../src/shared/getApiMetrics"
@@ -37,7 +38,7 @@ interface ChatViewProps {
 	showHistoryView: () => void
 }
 
-export const MAX_IMAGES_PER_MESSAGE = 20 // Anthropic limits to 20 images
+export const MAX_IMAGES_PER_MESSAGE = 20
 
 const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryView }: ChatViewProps) => {
 	const {
@@ -57,10 +58,13 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 		setMode,
 		autoApprovalEnabled,
 		alwaysAllowModeSwitch,
+		setState,
 	} = useExtensionState()
 
+	// const { setState } = useExtensionState();
+
 	//const task = messages.length > 0 ? (messages[0].say === "task" ? messages[0] : undefined) : undefined) : undefined
-	const task = useMemo(() => messages.at(0), [messages]) // leaving this less safe version here since if the first message is not a task, then the extension is in a bad state and needs to be debugged (see Cline.abort)
+	const task = useMemo(() => messages.at(0), [messages])
 	const modifiedMessages = useMemo(() => combineApiRequests(combineCommandSequences(messages.slice(1))), [messages])
 	// has to be after api_req_finished are all reduced into api_req_started messages
 	const apiMetrics = useMemo(() => getApiMetrics(modifiedMessages), [modifiedMessages])
@@ -70,7 +74,6 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 	const [textAreaDisabled, setTextAreaDisabled] = useState(false)
 	const [selectedImages, setSelectedImages] = useState<string[]>([])
 
-	// we need to hold on to the ask because useEffect > lastMessage will always let us know when an ask comes in and handle it, but by the time handleMessage is called, the last message might not be the ask anymore (it could be a say that followed)
 	const [clineAsk, setClineAsk] = useState<ClineAsk | undefined>(undefined)
 	const [enableButtons, setEnableButtons] = useState<boolean>(false)
 	const [primaryButtonText, setPrimaryButtonText] = useState<string | undefined>(undefined)
@@ -90,21 +93,23 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 	const lastMessage = useMemo(() => messages.at(-1), [messages])
 	const secondLastMessage = useMemo(() => messages.at(-2), [messages])
 
-	// Add RAG mode state
-	const [isRagModeEnabled, setIsRagModeEnabled] = useState(false);
-	// Add RAG mode toggle function
+	// RAG support
+	const [isRagModeEnabled, setIsRagModeEnabled] = useState(false)
 	const handleRagModeToggle = useCallback(() => {
-		setIsRagModeEnabled((prev) => !prev);
-	}, []);
+		setIsRagModeEnabled((prev) => !prev)
+	}, [])
+	const handleSaveRagSettings = useCallback((settings: Record<string, string>) => {
+		vscode.postMessage({
+			type: "updateRagConfig",
+			ragConfig: settings,
+		})
+	}, [])
 
 	function playSound(audioType: AudioType) {
 		vscode.postMessage({ type: "playSound", audioType })
 	}
 
 	useDeepCompareEffect(() => {
-		// if last message is an ask, show user ask UI
-		// if user finished a task, then start a new task with a new conversation history since in this moment that the extension is waiting for user response, the user could close the extension and the conversation history would be lost.
-		// basically as long as a task is active, the conversation history will be persisted
 		if (lastMessage) {
 			switch (lastMessage.type) {
 				case "ask":
@@ -216,7 +221,6 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 					}
 					break
 				case "say":
-					// don't want to reset since there could be a "say" after an "ask" while ask is waiting for response
 					switch (lastMessage.say) {
 						case "api_req_retry_delayed":
 							setTextAreaDisabled(true)
@@ -243,17 +247,15 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 						case "completion_result":
 						case "tool":
 							break
+						case "rag_response": // NEW: Handle RAG response
+							setTextAreaDisabled(false);
+							setClineAsk(undefined);
+							setEnableButtons(false);
+							break;
 					}
 					break
 			}
-		} else {
-			// this would get called after sending the first message, so we have to watch messages.length instead
-			// No messages, so user has to submit a task
-			// setTextAreaDisabled(false)
-			// setClineAsk(undefined)
-			// setPrimaryButtonText(undefined)
-			// setSecondaryButtonText(undefined)
-		}
+		} else {}
 	}, [lastMessage, secondLastMessage])
 
 	useEffect(() => {
@@ -270,8 +272,16 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 		setExpandedRows({})
 	}, [task?.ts])
 
+	// useEffect(() => {
+	//   const lastMessage = clineMessages[clineMessages.length - 1];
+	//   if (lastMessage?.type === "partialMessage") {
+	//       console.log("ChatView: Handling partialMessage", lastMessage);
+	//       // Append the partial message to the chat UI
+	//   }
+	// }, [clineMessages]);
+
 	const isStreaming = useMemo(() => {
-		const isLastAsk = !!modifiedMessages.at(-1)?.ask // checking clineAsk isn't enough since messages effect may be called again for a tool for example, set clineAsk to its value, and if the next message is not an ask then it doesn't reset. This is likely due to how much more often we're updating messages as compared to before, and should be resolved with optimizations as it's likely a rendering bug. but as a final guard for now, the cancel button will show if the last message is not an ask
+		const isLastAsk = !!modifiedMessages.at(-1)?.ask
 		const isToolCurrentlyAsking =
 			isLastAsk && clineAsk !== undefined && enableButtons && primaryButtonText !== undefined
 		if (isToolCurrentlyAsking) {
@@ -310,7 +320,20 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 						text,
 						images,
 						ragMode: isRagModeEnabled,
+					})
+				} else if (text.startsWith("/rag ")) { // NEW: Detect /rag command
+					const ragQuery = text.substring(5).trim(); // Extract the query
+					vscode.postMessage({
+							type: "ragQuery", // NEW: New message type
+							ragQuery: ragQuery,
+							images: images,
 					});
+					setInputValue(""); // Clear the input
+					setTextAreaDisabled(true);
+					setSelectedImages([]);
+					setClineAsk(undefined);
+					setEnableButtons(false);
+					disableAutoScrollRef.current = false;
 				} else if (clineAsk) {
 					switch (clineAsk) {
 						case "followup":
@@ -479,6 +502,9 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 	const handleMessage = useCallback(
 		(e: MessageEvent) => {
 			const message: ExtensionMessage = e.data
+
+			console.log(`[ChatView][handleMessage] message incoming ${JSON.stringify(message, null, 2)}`)
+
 			switch (message.type) {
 				case "action":
 					switch (message.action!) {
@@ -512,8 +538,29 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 							handleSecondaryButtonClick(message.text ?? "", message.images ?? [])
 							break
 					}
+					break
+				case "ragConfigUpdated":
+					console.log("\n\n" + message.ragMessage || "RAG configuration updated successfully." + "\n\n")
+					break
+				case "partialMessage": {
+					const partialMessage = message.partialMessage!
+					setState((prevState: ExtensionState) => {
+						const lastIndex = findLastIndex(
+							prevState.clineMessages,
+							(msg: ClineMessage) => msg.ts === partialMessage.ts,
+						)
+						if (lastIndex !== -1) {
+							const newClineMessages = [...prevState.clineMessages]
+							newClineMessages[lastIndex] = partialMessage
+							return { ...prevState, clineMessages: newClineMessages }
+						}
+						return prevState
+					})
+					break
+				}
+				default:
+					console.warn("Unknown message type:", message.type)
 			}
-			// textAreaRef.current is not explicitly required here since react gaurantees that ref will be stable across re-renders, and we're not using its value but its reference.
 		},
 		[
 			isHidden,
@@ -625,7 +672,6 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 		[mcpServers],
 	)
 
-	// Check if a command message is allowed
 	const isAllowedCommand = useCallback(
 		(message: ClineMessage | undefined): boolean => {
 			if (message?.type !== "ask") return false
@@ -777,7 +823,6 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 	}, [visibleMessages])
 
 	// scrolling
-
 	const scrollToBottomSmooth = useMemo(
 		() =>
 			debounce(
@@ -1024,38 +1069,36 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 				</div>
 			)}
 
-			{!task && (
-
-isRagModeEnabled ? (
-	<RagSettingsMenu
-		style={{
-			// marginBottom: -2,
-			marginTop: "2px",
-			marginRight: "10px",
-			marginBottom: "2px",
-			marginLeft: "10px",
-			flex: "0 1 auto",
-			minHeight: 0,
-		}}
-	/>
-) : (
-	<AutoApproveMenu
-		style={{
-			marginBottom: -2,
-			flex: "0 1 auto",
-			minHeight: 0,
-		}}
-	/>
-)
-
-			)}
+			{!task &&
+				(isRagModeEnabled ? (
+					<RagSettingsMenu
+						style={{
+							// marginBottom: -2,
+							marginTop: "2px",
+							marginRight: "10px",
+							marginBottom: "2px",
+							marginLeft: "10px",
+							flex: "0 1 auto",
+							minHeight: 0,
+						}}
+						onSave={handleSaveRagSettings}
+					/>
+				) : (
+					<AutoApproveMenu
+						style={{
+							marginBottom: -2,
+							flex: "0 1 auto",
+							minHeight: 0,
+						}}
+					/>
+				))}
 
 			{task && (
 				<>
 					<div style={{ flexGrow: 1, display: "flex" }} ref={scrollContainerRef}>
 						<Virtuoso
 							ref={virtuosoRef}
-							key={task.ts} // trick to make sure virtuoso re-renders when task changes, and we use initialTopMostItemIndex to start at the bottom
+							key={task.ts}
 							className="scrollable"
 							style={{
 								flexGrow: 1,
@@ -1064,9 +1107,8 @@ isRagModeEnabled ? (
 							components={{
 								Footer: () => <div style={{ height: 5 }} />, // Add empty padding at the bottom
 							}}
-							// increasing top by 3_000 to prevent jumping around when user collapses a row
-							increaseViewportBy={{ top: 3_000, bottom: Number.MAX_SAFE_INTEGER }} // hack to make sure the last message is always rendered to get truly perfect scroll to bottom animation when new messages are added (Number.MAX_SAFE_INTEGER is safe for arithmetic operations, which is all virtuoso uses this value for in src/sizeRangeSystem.ts)
-							data={groupedMessages} // messages is the raw format returned by extension, modifiedMessages is the manipulated structure that combines certain messages of related type, and visibleMessages is the filtered structure that removes messages that should not be rendered
+							increaseViewportBy={{ top: 3_000, bottom: Number.MAX_SAFE_INTEGER }}
+							data={groupedMessages}
 							itemContent={itemContent}
 							atBottomStateChange={(isAtBottom) => {
 								setIsAtBottom(isAtBottom)
@@ -1075,7 +1117,7 @@ isRagModeEnabled ? (
 								}
 								setShowScrollToBottom(disableAutoScrollRef.current && !isAtBottom)
 							}}
-							atBottomThreshold={10} // anything lower causes issues with followOutput
+							atBottomThreshold={10}
 							initialTopMostItemIndex={groupedMessages.length - 1}
 						/>
 					</div>
@@ -1158,15 +1200,14 @@ isRagModeEnabled ? (
 				isRagModeEnabled={isRagModeEnabled}
 				onRagModeToggle={handleRagModeToggle}
 			/>
-
 		</div>
 	)
 }
 
 const ScrollToBottomButton = styled.div`
-  background: rgba(255, 255, 255, 0.1); /* Semi-transparent background */
-  backdrop-filter: blur(10px); /* Frosted glass effect */
-  border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
+	background: rgba(255, 255, 255, 0.1); /* Semi-transparent background */
+	backdrop-filter: blur(10px); /* Frosted glass effect */
+	border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
 	background-color: color-mix(in srgb, var(--vscode-toolbar-hoverBackground) 55%, transparent);
 	border-radius: 10px;
 	overflow: hidden;
@@ -1179,13 +1220,13 @@ const ScrollToBottomButton = styled.div`
 
 	&:hover {
 		background: rgba(255, 255, 255, 0.2); /* Slightly more opaque on hover */
-    transform: translateY(-2px); /* Lift effect */
+		transform: translateY(-2px); /* Lift effect */
 		background-color: color-mix(in srgb, var(--vscode-toolbar-hoverBackground) 90%, transparent);
 	}
 
 	&:active {
 		background: rgba(255, 255, 255, 0.1); /* Return to original opacity */
-    transform: translateY(0); /* Reset position */
+		transform: translateY(0); /* Reset position */
 		background-color: color-mix(in srgb, var(--vscode-toolbar-hoverBackground) 70%, transparent);
 	}
 `

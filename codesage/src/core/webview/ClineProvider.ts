@@ -36,6 +36,12 @@ import { EXPERIMENT_IDS, experiments as Experiments, experimentDefault, Experime
 import { CustomSupportPrompts, supportPrompt } from "../../shared/support-prompt"
 
 import { ACTION_NAMES } from "../CodeActionProvider"
+import { RagSettings } from "../../services/rag/interfaces"
+import { getRagSettings, updateRagSettings } from "../../services/rag/ragSettings"
+import { reinitializeRagSystem, retrievalChain } from "../../services/rag/reinitializeRagSystem"
+import { openFolderDialog } from "./openFolderDialog"
+import { handleRagRequest, handleRagRequestWithInitialize } from "../../services/rag/handleRagRequest"
+import { RagService } from "./RagService"
 
 /*
 https://github.com/microsoft/vscode-webview-ui-toolkit-samples/blob/main/default/weather-webview/src/providers/WeatherViewProvider.ts
@@ -128,7 +134,7 @@ export const GlobalFileNames = {
 }
 
 export class ClineProvider implements vscode.WebviewViewProvider {
-	public static readonly sideBarId = "roo-cline.SidebarProvider" // used in package.json as the view's id. This value cannot be changed due to how vscode caches views based on their id, and updating the id would break existing instances of the extension.
+	public static readonly sideBarId = "roo-cline.SidebarProvider"
 	public static readonly tabPanelId = "roo-cline.TabPanelProvider"
 	private static activeInstances: Set<ClineProvider> = new Set()
 	private disposables: vscode.Disposable[] = []
@@ -338,7 +344,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 		this.outputChannel.appendLine("Webview view resolved")
 	}
 
-	public async initClineWithTask(task?: string, images?: string[]) {
+	public async initClineWithTask(task?: string, images?: string[], ragMode?: boolean) {
 		await this.clearTask()
 		const {
 			apiConfiguration,
@@ -363,6 +369,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			images,
 			undefined,
 			experiments,
+			ragMode,
 		)
 	}
 
@@ -547,8 +554,13 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 	 * @param webview A reference to the extension webview
 	 */
 	private setWebviewMessageListener(webview: vscode.Webview) {
+
+		// const ragService = new RagService(getRagSettings());
+
 		webview.onDidReceiveMessage(
+
 			async (message: WebviewMessage) => {
+
 				switch (message.type) {
 					case "webviewDidLaunch":
 						console.log("🔔 webviewDidLaunch");
@@ -660,19 +672,86 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						console.log("🔔 newTask:", JSON.stringify(message));
 						// vscode.window.showInformationMessage(message.text!)
 						// 🔔 newTask: {"type":"newTask","text":"create .gitignore here in this directory","images":[],"ragMode":true}
-
-						// initializing new instance of Cline will make sure that any agentically running promises in old instance don't affect our new task. this essentially creates a fresh slate for the new task
-						await this.initClineWithTask(message.text, message.images)
+						// await this.initClineWithTask(message.text, message.images)
+						if (message.ragMode) {
+							await this.initClineWithTask(message.text, message.images, message.ragMode);
+							// try {
+							// 	// let response: string;
+							// 	const ragSettings = getRagSettings();
+							// 	const query = message.text;
+							// 	if (!query) {
+							// 		throw new Error(`No message.text in ${JSON.stringify(message.text, null, 2)}.`);
+							// 	}
+							// 	// if (!retrievalChain) {
+							// 	// 	const folderPath = ragSettings.RAG_FOLDER_PATH;
+							// 	// 	if (!folderPath) {
+							// 	// 		throw new Error("No folder selected for RAG processing.");
+							// 	// 	}
+							// 	// 	response = await handleRagRequestWithInitialize(folderPath, query);
+							// 	// } else {
+							// 	// 	response = await handleRagRequest(query);
+							// 	// }
+							// 	const folderPath = ragSettings.RAG_FOLDER_PATH;
+							// 	if (!folderPath) {
+							// 		throw new Error("No folder selected for RAG processing.");
+							// 	}
+							// 	const response = await ragService.processQuery(query);
+							// 	// Send response back to webview as ExtensionMessage
+							// 	await this.postMessageToWebview({
+							// 		type: "partialMessage",
+							// 		partialMessage: response,
+							// 		// isFinal: true,
+							// 	});
+							// } catch (error) {
+							// 	console.error("Error processing RAG request:", error);
+							// 	// await this.postMessageToWebview({
+							// 	// 	type: "errorMessage",
+							// 	// 	text: `Failed to process RAG request: ${error.message}`,
+							// 	// });
+							// }
+						} else {
+							await this.initClineWithTask(message.text, message.images);
+						}
 						break
 					case "askResponse":
 						console.log("🔔 askResponse:", JSON.stringify(message));
-
 						// 🔔 askResponse: {"type":"askResponse","askResponse":"yesButtonClicked"}
 						// 🔔 askResponse: {"type":"askResponse","askResponse":"messageResponse","text":"add more information in the README.md","images":[],"ragMode":true}
-						// 🔔 askResponse: {"type":"askResponse","askResponse":"yesButtonClicked"}
-						// 🔔 askResponse: {"type":"askResponse","askResponse":"yesButtonClicked"}
 
 						this.cline?.handleWebviewAskResponse(message.askResponse!, message.text, message.images)
+
+						// if (message.ragMode && message.text) { // NEW: Check for ragMode and text
+						// 	if (this.cline) {
+						// 		try {
+						// 			// Save the current askResponse data
+						// 			const currentAskResponse = message.askResponse;
+						// 			const currentText = message.text;
+						// 			const currentImages = message.images;
+
+						// 			// Clear the current ask state
+						// 			this.cline.askResponse = undefined;
+						// 			this.cline.askResponseText = undefined;
+						// 			this.cline.askResponseImages = undefined;
+
+						// 			// Execute the RAG query
+						// 			await this.cline.ragQuery(currentText, currentImages);
+
+						// 			// Potentially clear the askResponse state here, depending on your desired behavior
+						// 			// this.cline.askResponse = undefined;
+						// 			break; // Exit the askResponse handling
+						// 		} catch (error) {
+						// 			console.error("Error processing RAG request:", error);
+						// 			vscode.window.showErrorMessage(`Failed to process RAG request: ${error.message}`);
+						// 			break;
+						// 		}
+						// 	} else {
+						// 		vscode.window.showErrorMessage("No active task to perform RAG query on.");
+						// 		break;
+						// 	}
+						// } else {
+						// 	this.cline?.handleWebviewAskResponse(message.askResponse!, message.text, message.images);
+						// }
+
 						break
 					case "enhancePrompt":
 						console.log("🔔 enhancePrompt");
@@ -719,6 +798,48 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 							}
 						}
 						break
+					case "updateRagConfig":
+						console.log("🔔 updateRagConfig");
+						const newConfig = message.ragConfig as Partial<RagSettings>;
+						// updateRagSettings(newConfig);
+						// reinitializeRagSystem(newConfig.RAG_FOLDER_PATH ?? 'c:/hapus/upwork');
+						// Open a folder dialog if RAG_FOLDER_PATH is not provided
+						let ragFolderPath: string | undefined;
+						if (!newConfig.RAG_FOLDER_PATH) {
+							const selectedFolder = await openFolderDialog();
+							if (!selectedFolder) {
+								console.warn("No folder selected. Aborting RAG configuration update.");
+								this.view?.webview.postMessage({
+									type: "ragConfigError",
+									ragMessage: "No folder selected. RAG configuration update aborted.",
+								});
+								break; // Exit the case if no folder is selected
+							}
+							ragFolderPath = selectedFolder;
+						} else {
+							ragFolderPath = newConfig.RAG_FOLDER_PATH;
+						}
+						// Update RAG settings and reinitialize the RAG system
+						updateRagSettings({ ...newConfig, RAG_FOLDER_PATH: ragFolderPath });
+						reinitializeRagSystem(ragFolderPath)
+						this.view?.webview.postMessage({
+							type: "ragConfigUpdated",
+							ragMessage: "RAG configuration updated successfully.",
+						});
+						break;
+					case "ragQuery": // NEW: Handle RAG query message
+						console.log("🔔 ragQuery:", JSON.stringify(message));
+						if (this.cline) {
+							try {
+								await this.cline.ragQuery(message.ragQuery as string, message.images);
+							} catch (error) {
+								console.error("Error processing RAG request:", error);
+								vscode.window.showErrorMessage(`Failed to process RAG request: ${error.message}`);
+							}
+						} else {
+							vscode.window.showErrorMessage("No active task to perform RAG query on.");
+						}
+						break;
 
 					case "apiConfiguration":
 						console.log("🔔 apiConfiguration");

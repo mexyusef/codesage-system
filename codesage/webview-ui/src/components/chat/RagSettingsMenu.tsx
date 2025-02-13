@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { vscode } from "../../utils/vscode";
 import { VSCodeTextField, VSCodeButton } from "@vscode/webview-ui-toolkit/react";
 
 const renderLabeledTextField = (
@@ -52,27 +53,29 @@ const renderLabeledTextField = (
 );
 
 interface RagSettingsMenuProps {
-  style?: React.CSSProperties
+  style?: React.CSSProperties;
   // isExpanded?: boolean;
   // toggleExpanded?: () => void;
+  onSave?: (settings: Record<string, string>) => void;
 }
 
 const RagSettingsMenu = ({ 
   style,
   // isExpanded,
-  // toggleExpanded
+  // toggleExpanded,
+  onSave,
 }: RagSettingsMenuProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const toggleExpanded = () => {
     setIsExpanded((prev) => !prev);
   };
   const [settings, setSettings] = useState({
-    PINECONE_API_KEY: "",
-    PINECONE_INDEX_NAME: "",
+    PINECONE_API_KEY: "pcsk_...",
+    PINECONE_INDEX_NAME: "singaparna",
     PINECONE_NAMESPACE: "default",
-    OPENAI_API_KEY: "",
+    OPENAI_API_KEY: "sk-...",
     EMBEDDING_MODEL_NAME: "text-embedding-3-small",
-    RAG_FOLDER_PATH: "",
+    RAG_FOLDER_PATH: "C:\\hapus\\upwork\\codesage\\src\\core\\webview",
     CHUNK_MAX_TOKENS: "100",
     QUERY_TOP_K: "5",
     TEXT_SPLITTER_CHUNK_SIZE: "1000",
@@ -84,7 +87,13 @@ const RagSettingsMenu = ({
   };
 
   const handleSubmit = () => {
-    // Send settings to the backend or save them in the context
+    if (onSave) {
+      onSave(settings);
+    }
+    vscode.postMessage({
+      type: "updateRagConfig",
+      ragConfig: settings,
+    });
     console.log("Saving RAG settings:", settings);
   };
 
