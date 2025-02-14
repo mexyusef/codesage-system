@@ -1,7 +1,7 @@
 import { queryRagSystem } from "./rag/utils/queryRagSystem";
 import { reinitializeRagSystem, retrievalChain } from "./reinitializeRagSystem";
 
-export async function handleRagRequest(query: string): Promise<string> {
+export async function handleRagRequest(query: string): Promise<any> {
   try {
     if (!retrievalChain) {
       throw new Error("RAG system not initialized. Call reinitializeRagSystem first.");
@@ -21,7 +21,7 @@ export async function handleRagRequest(query: string): Promise<string> {
   }
 }
 
-export async function handleRagRequestWithInitialize(folderPath: string, query: string): Promise<string> {
+export async function handleRagRequestWithInitialize(folderPath: string, query: string): Promise<any> {
   try {
     if (!query?.trim()) {
       throw new Error("Query cannot be empty");

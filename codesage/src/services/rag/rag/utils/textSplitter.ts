@@ -10,24 +10,26 @@ function transformDocument(doc: any): Document {
   };
 }
 
-const ragSettings = getRagSettings();
-console.log(`*** textSplitter *** initial embeddings values: ${JSON.stringify(ragSettings, null, 2)}`);
-
-export const textSplitter = new RecursiveCharacterTextSplitter({
-  chunkSize: ragSettings.TEXT_SPLITTER_CHUNK_SIZE,
-  chunkOverlap: ragSettings.TEXT_SPLITTER_CHUNK_OVERLAP,
-  separators: ["\n\n", "\n", " ", ""],
-});
+export function getTextSplitter() {
+  const ragSettings = getRagSettings();
+  console.log(`*** textSplitter *** initial embeddings values: ${JSON.stringify(ragSettings, null, 2)}`);
+  
+  const textSplitter = new RecursiveCharacterTextSplitter({
+    chunkSize: ragSettings.TEXT_SPLITTER_CHUNK_SIZE,
+    chunkOverlap: ragSettings.TEXT_SPLITTER_CHUNK_OVERLAP,
+    separators: ["\n\n", "\n", " ", ""],
+  });
+  return textSplitter;
+}
 
 export async function splitDocuments(docs: Document[]): Promise<Document[]> {
-  // Retrieve the latest RAG settings dynamically
   const ragSettings = getRagSettings();
   const chunkSize = parseInt(ragSettings.TEXT_SPLITTER_CHUNK_SIZE as unknown as string, 10);
   const chunkOverlap = parseInt(ragSettings.TEXT_SPLITTER_CHUNK_OVERLAP as unknown as string, 10);
   // Dynamically update the text splitter configuration if needed
   const dynamicTextSplitter = new RecursiveCharacterTextSplitter({
-    chunkSize: ragSettings.TEXT_SPLITTER_CHUNK_SIZE,
-    chunkOverlap: ragSettings.TEXT_SPLITTER_CHUNK_OVERLAP,
+    chunkSize: chunkSize, // ragSettings.TEXT_SPLITTER_CHUNK_SIZE,
+    chunkOverlap: chunkOverlap, // ragSettings.TEXT_SPLITTER_CHUNK_OVERLAP,
     separators: ["\n\n", "\n", " ", ""],
   });
 

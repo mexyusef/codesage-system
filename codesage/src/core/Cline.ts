@@ -65,6 +65,7 @@ import { EXPERIMENT_IDS, experiments as Experiments } from "../shared/experiment
 import { handleRagRequest, handleRagRequestWithInitialize } from "../services/rag/handleRagRequest"
 import { getRagSettings } from "../services/rag/ragSettings"
 import { RagService } from "./webview/RagService"
+import { DirectoryService } from "./webview/DirectoryService"
 
 const cwd =
 	vscode.workspace.workspaceFolders?.map((folder) => folder.uri.fsPath).at(0) ?? path.join(os.homedir(), "Desktop")
@@ -81,11 +82,6 @@ export class Cline {
 	private urlContentFetcher: UrlContentFetcher
 	private browserSession: BrowserSession
 
-	/**
-	 * Processes a message for slash commands and handles mode switching if needed.
-	 * @param message The message to process
-	 * @returns The processed message with slash command removed if one was present
-	 */
 	private async handleSlashCommand(message: string): Promise<string> {
 		if (!message) return message
 
@@ -103,6 +99,7 @@ export class Cline {
 
 		return message
 	}
+
 	private didEditFile: boolean = false
 	customInstructions?: string
 	diffStrategy?: DiffStrategy
@@ -116,6 +113,7 @@ export class Cline {
 	askResponseImages?: string[]
 	private ragMode: boolean = false
 	private ragService: RagService
+	directoryService: DirectoryService
 	private lastMessageTs?: number
 	private consecutiveMistakeCount: number = 0
 	private consecutiveMistakeCountForApplyDiff: Map<string, number> = new Map()
@@ -136,6 +134,7 @@ export class Cline {
 	private didRejectTool = false
 	private didAlreadyUseTool = false
 	private didCompleteReadingStream = false
+	directoryContent?: string
 
 	constructor(
 		provider: ClineProvider,
@@ -151,6 +150,7 @@ export class Cline {
 	) {
 		this.ragMode = ragMode ?? false;
 		this.ragService = new RagService(getRagSettings());
+		this.directoryService = new DirectoryService();
 		if (!task && !images && !historyItem) {
 			throw new Error("Either historyItem or task/images must be provided")
 		}
@@ -180,7 +180,6 @@ export class Cline {
 		}
 	}
 
-	// Add method to update diffStrategy
 	async updateDiffStrategy(experimentalDiffStrategy?: boolean) {
 		// If not provided, get from current state
 		if (experimentalDiffStrategy === undefined) {
@@ -298,13 +297,33 @@ export class Cline {
 			throw new Error("Code-Sage instance aborted")
 		}
 
-		if (ragMode && text) {
-			const ragResponse = await handleRagRequest(text);
-			return {
-				response: "messageResponse" as ClineAskResponse,
-				text: ragResponse,
-			};
-		}
+		// if (ragMode && text) {
+		// 	const ragResponse = await handleRagRequest(text);
+		// 	const result = {
+		// 		response: "messageResponse" as ClineAskResponse,
+		// 		text: ragResponse,
+		// 	};
+		// 	const sayTs = Date.now();
+		// 	this.lastMessageTs = sayTs;
+		// 	this.askResponse = undefined
+		// 	this.askResponseText = undefined
+		// 	this.askResponseImages = undefined
+		// 	return result
+		// }
+
+		// if (this.ragMode && text) {
+		// 	try {
+		// 		const sayTs = Date.now();
+		// 		this.lastMessageTs = sayTs;
+		// 		await this.addToClineMessages({ ts: sayTs, type: "say", say: "rag_response", text });
+		// 		await this.providerRef.deref()?.postStateToWebview();
+		// 		await this.ragQuery(text);
+		// 		return;
+		// 	} catch (error) {
+		// 		await this.say("error", `RAG query failed: ${error}`);
+		// 		return;
+		// 	}
+		// }
 
 		let askTs: number
 		if (partial !== undefined) {
@@ -332,9 +351,7 @@ export class Cline {
 					throw new Error("Current ask promise was ignored 2")
 				}
 			} else {
-				// partial=false means its a complete version of a previously partial message
 				if (isUpdatingPreviousPartial) {
-					// this is the complete version of a previously partial message, so replace the partial with the complete version
 					this.askResponse = undefined
 					this.askResponseText = undefined
 					this.askResponseImages = undefined
@@ -465,6 +482,12 @@ export class Cline {
 			await this.addToApiConversationHistory({ role: "user", content: [{ type: "text", text: query }] });
 			await this.addToApiConversationHistory({ role: "assistant", content: [{ type: "text", text: ragResponseText }] });
 			await this.providerRef.deref()?.postStateToWebview();
+
+			// NEW: Clear the ask state after RAG query
+			this.askResponse = undefined;
+			this.askResponseText = undefined;
+			this.askResponseImages = undefined;
+
 		} catch (error) {
 			await this.say("error", `RAG query failed: ${error}`);
 		}
@@ -734,16 +757,50 @@ export class Cline {
 	}
 
 	private async initiateTaskLoop(userContent: UserContent): Promise<void> {
-		let nextUserContent = userContent
+		if (this.abort) {
+			throw new Error("Code-Sage instance aborted")
+		}
+
+		// if (this.directoryContent) {
+		// 	userContent.push({
+		// 		type: "text",
+		// 		text: `\n\nDirectory Content:\n${this.directoryContent}\n`,
+		// 	})
+		// }
+		// let nextUserContent = userContent
 		let includeFileDetails = true
+		// while (!this.abort) {
+		// 	const didEndLoop = await this.recursivelyMakeClineRequests(nextUserContent, includeFileDetails)
+		// 	includeFileDetails = false
+
+		// 	if (didEndLoop) {
+		// 		break
+		// 	} else {
+		// 		nextUserContent = [
+		// 			{
+		// 				type: "text",
+		// 				text: formatResponse.noToolsUsed(),
+		// 			},
+		// 		]
+		// 		this.consecutiveMistakeCount++
+		// 	}
+		// }
 		while (!this.abort) {
+			// Add the directory content to the user content
+			let nextUserContent = userContent;
+			if (this.directoryContent) {
+				nextUserContent = [...userContent, {
+					type: "text",
+					text: `\n\nDirectory Content:\n${this.directoryContent}\n`,
+				}];
+			}
 			const didEndLoop = await this.recursivelyMakeClineRequests(nextUserContent, includeFileDetails)
 			includeFileDetails = false
-
+	
 			if (didEndLoop) {
 				break
 			} else {
-				nextUserContent = [
+				userContent = [
 					{
 						type: "text",
 						text: formatResponse.noToolsUsed(),
@@ -752,6 +809,8 @@ export class Cline {
 				this.consecutiveMistakeCount++
 			}
 		}
+
+
 	}
 
 	abortTask() {

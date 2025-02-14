@@ -30,8 +30,10 @@ interface ChatTextAreaProps {
 	onHeightChange?: (height: number) => void
 	mode: Mode
 	setMode: (value: Mode) => void
-	isRagModeEnabled: boolean;
-	onRagModeToggle: () => void;
+	isRagModeEnabled: boolean
+	onRagModeToggle: () => void
+	onSelectDirectory: () => void
+	directoryPath: string | undefined
 }
 
 const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
@@ -51,6 +53,8 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 			setMode,
 			isRagModeEnabled,
 			onRagModeToggle,
+			onSelectDirectory,
+			directoryPath,
 		},
 		ref,
 	) => {
@@ -108,10 +112,7 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 		const contextMenuContainerRef = useRef<HTMLDivElement>(null)
 		const [isEnhancingPrompt, setIsEnhancingPrompt] = useState(false)
 		const [isFocused, setIsFocused] = useState(false)
-		// const [isRagModeEnabled, setIsRagModeEnabled] = useState(false);
-		// const handleRagModeToggle = useCallback(() => {
-		// 	setIsRagModeEnabled((prev) => !prev);
-		// }, []);
+		const [visible, setVisible] = useState(false)
 
 		// Fetch git commits when Git is selected or when typing a hash
 		useEffect(() => {
@@ -791,7 +792,7 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 						</div>
 
 						{/* default dropdown */}
-						<div
+						{visible && <div
 							className="glass-effect"
 							style={{
 								position: "relative",
@@ -846,7 +847,7 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 							<div style={caretContainerStyle}>
 								<CaretIcon />
 							</div>
-						</div>
+						</div>}
 					</div>
 
 					{/* enhance, image, send buttons */}
@@ -856,79 +857,81 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 							alignItems: "center",
 							gap: "12px",
 						}}>
+						{/* RAG Mode Toggle Switch */}
+						<div
+							className="toggle-switch-container glass-effect neon-border-small"
+							style={{
+								position: "relative",
+								display: "inline-block",
+								width: "40px",
+								height: "20px",
+							}}>
+							<input
+								type="checkbox"
+								checked={isRagModeEnabled}
+								onChange={onRagModeToggle}
+								style={{
+									opacity: 0,
+									width: 0,
+									height: 0,
+								}}
+								id="rag-mode-toggle"
+							/>
 
-	{/* RAG Mode Toggle Switch */}
-	<div className="toggle-switch-container glass-effect neon-border-small"
-		style={{
-			position: "relative",
-			display: "inline-block",
-			width: "40px",
-			height: "20px",
-		}}
-	>
+							<label
+								htmlFor="rag-mode-toggle"
+								style={{
+									position: "absolute",
+									cursor: "pointer",
+									top: 0,
+									left: 0,
+									right: 0,
+									bottom: 0,
+									backgroundColor: isRagModeEnabled
+										? "var(--vscode-button-background)"
+										: "var(--vscode-input-background)",
+									borderRadius: "20px",
+									transition: "background-color 0.2s",
+								}}>
+								<span
+									style={{
+										position: "absolute",
+										content: '""',
+										height: "16px",
+										width: "16px",
+										left: isRagModeEnabled ? "22px" : "2px",
+										bottom: "2px",
+										backgroundColor: "var(--vscode-input-foreground)",
+										borderRadius: "50%",
+										transition: "left 0.2s",
+									}}
+								/>
+							</label>
 
-		<input type="checkbox"
-			checked={isRagModeEnabled}
-			onChange={onRagModeToggle}
-			style={{
-				opacity: 0,
-				width: 0,
-				height: 0,
-			}}
-			id="rag-mode-toggle"
-		/>
-
-		<label
-			htmlFor="rag-mode-toggle"
-			style={{
-				position: "absolute",
-				cursor: "pointer",
-				top: 0,
-				left: 0,
-				right: 0,
-				bottom: 0,
-				backgroundColor: isRagModeEnabled ? "var(--vscode-button-background)" : "var(--vscode-input-background)",
-				borderRadius: "20px",
-				transition: "background-color 0.2s",
-			}}
-		>
-			<span
-				style={{
-					position: "absolute",
-					content: '""',
-					height: "16px",
-					width: "16px",
-					left: isRagModeEnabled ? "22px" : "2px",
-					bottom: "2px",
-					backgroundColor: "var(--vscode-input-foreground)",
-					borderRadius: "50%",
-					transition: "left 0.2s",
-				}}
-			/>
-		</label>
-
-		{/* Tooltip */}
-		{isRagModeEnabled && <span
-			style={{
-				position: "absolute",
-				top: "-20px",
-				left: "50%",
-				transform: "translateX(-50%)",
-				backgroundColor: "var(--vscode-editorWidget-background)",
-				color: "var(--vscode-editorWidget-foreground)",
-				padding: "8px 4px",
-				borderRadius: "4px",
-				fontSize: "8px",
-				opacity: 0.75,
-				transition: "opacity 0.2s",
-				pointerEvents: "none",
-				whiteSpace: "nowrap",
-				zIndex: 1000000,
-			}}
-			className="tooltip"
-		>RAG</span>}
-
-	</div>
+							{/* Tooltip */}
+							{isRagModeEnabled && (
+								<span
+									style={{
+										position: "absolute",
+										top: "-20px",
+										left: "50%",
+										transform: "translateX(-50%)",
+										backgroundColor: "var(--vscode-editorWidget-background)",
+										color: "var(--vscode-editorWidget-foreground)",
+										padding: "8px 4px",
+										borderRadius: "4px",
+										fontSize: "8px",
+										opacity: 0.75,
+										transition: "opacity 0.2s",
+										pointerEvents: "none",
+										whiteSpace: "nowrap",
+										zIndex: 1000000,
+									}}
+									className="tooltip">
+									RAG
+								</span>
+							)}
+						</div>
 
 						<div style={{ display: "flex", alignItems: "center" }}>
 							{isEnhancingPrompt ? (
@@ -954,7 +957,23 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 								/>
 							)}
 						</div>
-
+						{/* <span
+							appearance="icon"
+							onClick={onSelectDirectory}
+							title="Attach Directory"
+							disabled={textAreaDisabled}
+							style={{
+								opacity: textAreaDisabled ? 0.5 : 1,
+								cursor: textAreaDisabled ? "not-allowed" : "pointer",
+							}}>
+							
+						</span> */}
+						<span
+							className={`input-icon-button ${
+								shouldDisableImages ? "disabled" : ""
+							} codicon codicon-folder`}
+							onClick={onSelectDirectory}
+						/>
 						<span
 							className={`input-icon-button ${
 								shouldDisableImages ? "disabled" : ""

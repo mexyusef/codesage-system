@@ -85,6 +85,8 @@ export interface WebviewMessage {
 		| "openCustomModesSettings"
 		| "updateRagConfig"
 		| "ragQuery"
+		| "insertIntoEditor"
+		| "selectDirectory"
 	text?: string;
 	disabled?: boolean;
 	askResponse?: ClineAskResponse;

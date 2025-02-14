@@ -613,9 +613,10 @@ export const ChatRowContent = ({
 					)
 				case "rag_response":
 					return (
-							<div className="chat-row rag-response">
-									{message.text}
-							</div>
+							// <div className="chat-row rag-response">
+							// 	{message.text}
+							// </div>
+							<Markdown markdown={message.text} />
 					);
 				case "user_feedback":
 					return (
@@ -996,8 +997,14 @@ export const ProgressIndicator = () => (
 const Markdown = memo(({ markdown, partial }: { markdown?: string; partial?: boolean }) => {
 	const [isHovering, setIsHovering] = useState(false)
 
+	const handleInsertIntoEditor = () => {
+		// Send a message to the extension backend to insert the markdown into the editor
+		vscode.postMessage({ type: "insertIntoEditor", text: markdown })
+	}
+
 	return (
 		<div
+			className="glass-effect"
 			onMouseEnter={() => setIsHovering(true)}
 			onMouseLeave={() => setIsHovering(false)}
 			style={{ position: "relative" }}>
@@ -1022,6 +1029,21 @@ const Markdown = memo(({ markdown, partial }: { markdown?: string; partial?: boo
 							}
 						`}
 					</style>
+
+					<VSCodeButton
+						className="insert-button"
+						appearance="icon"
+						style={{
+							height: "24px",
+							border: "none",
+							background: "var(--vscode-editor-background)",
+							transition: "background 0.2s ease-in-out",
+						}}
+						onClick={handleInsertIntoEditor}
+						title="Insert into Editor">
+						<span className="codicon codicon-insert"></span>
+					</VSCodeButton>
+
 					<VSCodeButton
 						className="copy-button"
 						appearance="icon"

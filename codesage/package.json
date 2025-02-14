@@ -71,7 +71,7 @@
 			{
 				"command": "roo-cline.plusButtonClicked",
 				"title": "New Task",
-				"icon": "$(add)"
+				"icon": "$(home)"
 			},
 			{
 				"command": "roo-cline.mcpButtonClicked",
@@ -151,11 +151,6 @@
 				{
 					"command": "roo-cline.plusButtonClicked",
 					"group": "navigation@1",
-					"when": "view == roo-cline.SidebarProvider"
-				},
-				{
-					"command": "roo-cline.promptsButtonClicked",
-					"group": "navigation@2",
 					"when": "view == roo-cline.SidebarProvider"
 				},
 				{

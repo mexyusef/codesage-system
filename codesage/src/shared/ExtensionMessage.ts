@@ -43,6 +43,7 @@ export interface ExtensionMessage {
 		| "updateCustomMode"
 		| "deleteCustomMode"
 		| "ragConfigUpdated"
+		| "directorySelected"
 	text?: string
 	action?:
 		| "chatButtonClicked"

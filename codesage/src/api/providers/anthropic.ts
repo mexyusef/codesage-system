@@ -25,6 +25,18 @@ export class AnthropicHandler implements ApiHandler, SingleCompletionHandler {
 	async *createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream {
 		let stream: AnthropicStream<Anthropic.Beta.PromptCaching.Messages.RawPromptCachingBetaMessageStreamEvent>
 		const modelId = this.getModel().id
+
+		///////////////////////// LOG REQUEST
+		const requestPayload = {
+			model: modelId,
+			max_tokens: this.getModel().info.maxTokens || 8192,
+			temperature: 0,
+			system: [{ text: systemPrompt, type: "text" }],
+			messages,
+			stream: true,
+		}
+		console.log("Anthropic API Request Payload:", JSON.stringify(requestPayload, null, 2))
+
 		switch (modelId) {
 			// 'latest' alias does not support cache_control
 			case "claude-3-5-sonnet-20241022":
@@ -53,17 +65,17 @@ export class AnthropicHandler implements ApiHandler, SingleCompletionHandler {
 									content:
 										typeof message.content === "string"
 											? [
-													{
-														type: "text",
-														text: message.content,
-														cache_control: { type: "ephemeral" },
-													},
-												]
+												{
+													type: "text",
+													text: message.content,
+													cache_control: { type: "ephemeral" },
+												},
+											]
 											: message.content.map((content, contentIndex) =>
-													contentIndex === message.content.length - 1
-														? { ...content, cache_control: { type: "ephemeral" } }
-														: content,
-												),
+												contentIndex === message.content.length - 1
+													? { ...content, cache_control: { type: "ephemeral" } }
+													: content,
+											),
 								}
 							}
 							return message

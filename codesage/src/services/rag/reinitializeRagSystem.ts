@@ -1,6 +1,6 @@
 import { validateFolderPath } from "./rag/config/validateConfig";
 import { createChain } from "./rag/services/chainService";
-import { embeddings } from "./rag/services/openAIService";
+import { getEmbeddings } from "./rag/services/openAIService";
 import { initializePineconeStore } from "./rag/services/pineconeService";
 import { readAndFilterFiles } from "./rag/utils/fileUtils";
 import { splitDocuments } from "./rag/utils/textSplitter";
@@ -24,7 +24,7 @@ export async function reinitializeRagSystem(folderPath: string): Promise<void> {
     console.log(`[reinitializeRagSystem] #4 docs.length = ${docs.length} => initializePineconeStore`);
     const pineconeStore = await initializePineconeStore(
       docs,
-      embeddings,
+      getEmbeddings(),
       // currentRagSettings.PINECONE_API_KEY,
       // currentRagSettings.PINECONE_INDEX_NAME,
       // currentRagSettings.PINECONE_NAMESPACE
@@ -50,7 +50,7 @@ export async function initializeRagSystem(folderPath: string): Promise<void> {
     const rawDocs = await readAndFilterFiles(files, folderPath);
     const docs = await splitDocuments(rawDocs);
 
-    const pineconeStore = await initializePineconeStore(docs, embeddings);
+    const pineconeStore = await initializePineconeStore(docs, getEmbeddings());
     retrievalChain = await createChain(pineconeStore);
 
     console.log("RAG system initialized successfully.");

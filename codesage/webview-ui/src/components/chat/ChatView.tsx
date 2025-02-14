@@ -104,6 +104,11 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 			ragConfig: settings,
 		})
 	}, [])
+	const [directoryPath, setDirectoryPath] = useState<string | undefined>(undefined)
+	const selectDirectory = useCallback(async () => {
+		vscode.postMessage({ type: "selectDirectory" })
+	}, [])
+
 
 	function playSound(audioType: AudioType) {
 		vscode.postMessage({ type: "playSound", audioType })
@@ -1060,9 +1065,7 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 					<div style={{ padding: "0 20px", flexShrink: 0 }}>
 						<h2>CodeSage - Project explainer and generator</h2>
 						<p>
-							This VSCode extension is developed to be the best problem solver and code generator in the
-							market as an attempt to prepare the industry to embrace the age of AGI and the utopian world
-							where there are no software developers, but only CEOs and agent systems.
+							To start initially go to the Settings page and provide values for LLM provider, api key and model.
 						</p>
 					</div>
 					{taskHistory.length > 0 && <HistoryPreview showHistoryView={showHistoryView} />}
@@ -1152,6 +1155,7 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 							}}>
 							{primaryButtonText && !isStreaming && (
 								<VSCodeButton
+									className="glass-effect neon-border-small"
 									appearance="primary"
 									disabled={!enableButtons}
 									style={{
@@ -1164,6 +1168,7 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 							)}
 							{(secondaryButtonText || isStreaming) && (
 								<VSCodeButton
+									className="glass-effect neon-border-small"
 									appearance="secondary"
 									disabled={!enableButtons && !(isStreaming && !didClickCancel)}
 									style={{
@@ -1199,6 +1204,8 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 				setMode={setMode}
 				isRagModeEnabled={isRagModeEnabled}
 				onRagModeToggle={handleRagModeToggle}
+				onSelectDirectory={selectDirectory}
+				directoryPath={directoryPath}
 			/>
 		</div>
 	)

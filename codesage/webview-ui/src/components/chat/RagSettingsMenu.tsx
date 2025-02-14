@@ -173,16 +173,16 @@ const RagSettingsMenu = ({
           }}
         >
 
-
-          <h4>OPENAI</h4>
+          <h4>SETTINGS</h4>
           {renderLabeledTextField("OpenAI API Key", "OPENAI_API_KEY", settings.OPENAI_API_KEY, handleInputChange, "password")}
-          {renderLabeledTextField("Embedding Model Name", "EMBEDDING_MODEL_NAME", settings.EMBEDDING_MODEL_NAME, handleInputChange)}
-          <h4>PINECONE</h4>
           {renderLabeledTextField("Pinecone API Key", "PINECONE_API_KEY", settings.PINECONE_API_KEY, handleInputChange, "password")}
           {renderLabeledTextField("Pinecone Index Name", "PINECONE_INDEX_NAME", settings.PINECONE_INDEX_NAME, handleInputChange)}
+          {renderLabeledTextField("RAG Folder Path", "RAG_FOLDER_PATH", settings.RAG_FOLDER_PATH, handleInputChange)}
+          <h4>OPENAI</h4>
+          {renderLabeledTextField("Embedding Model Name", "EMBEDDING_MODEL_NAME", settings.EMBEDDING_MODEL_NAME, handleInputChange)}
+          <h4>PINECONE</h4>
           {renderLabeledTextField("Pinecone Namespace", "PINECONE_NAMESPACE", settings.PINECONE_NAMESPACE, handleInputChange)}
           <h4>RAG</h4>
-          {renderLabeledTextField("RAG Folder Path", "RAG_FOLDER_PATH", settings.RAG_FOLDER_PATH, handleInputChange)}
           {renderLabeledTextField("Chunk Max Tokens", "CHUNK_MAX_TOKENS", settings.CHUNK_MAX_TOKENS, handleInputChange)}
           {renderLabeledTextField("Query Top K", "QUERY_TOP_K", settings.QUERY_TOP_K, handleInputChange)}
           {renderLabeledTextField("Text Splitter Chunk Size", "TEXT_SPLITTER_CHUNK_SIZE", settings.TEXT_SPLITTER_CHUNK_SIZE, handleInputChange)}

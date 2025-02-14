@@ -274,10 +274,9 @@ const PromptsView = ({ onDone }: PromptsViewProps) => {
 	}
 
 	const handleAgentReset = (modeSlug: string, type: "roleDefinition" | "customInstructions") => {
-		// Only reset for built-in modes
 		const existingPrompt = customModePrompts?.[modeSlug] as PromptComponent
 		const updatedPrompt = { ...existingPrompt }
-		delete updatedPrompt[type] // Remove the field entirely to ensure it reloads from defaults
+		delete updatedPrompt[type]
 
 		vscode.postMessage({
 			type: "updatePrompt",
@@ -326,7 +325,9 @@ const PromptsView = ({ onDone }: PromptsViewProps) => {
 					padding: "10px 17px 10px 20px",
 				}}>
 				<h3 style={{ color: "var(--vscode-foreground)", margin: 0 }}>Prompts</h3>
-				<VSCodeButton onClick={onDone}>Done</VSCodeButton>
+				<VSCodeButton
+					className="glass-effect neon-border-small"
+					onClick={onDone}>Done</VSCodeButton>
 			</div>
 
 			<div style={{ flex: 1, overflow: "auto", padding: "0 20px" }}>

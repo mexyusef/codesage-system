@@ -42,10 +42,29 @@ export class RagService {
     this.retrievalChain = retrievalChain;
   }
 
+  async handleRagRequestWithCitations(query: string): Promise<{ response: string; sources: string[] }> {
+    try {
+      if (!retrievalChain) {
+        console.log(`[RagService][handleRagRequestWithCitations] retrievalChain not initialized...initializing...`);
+        await this.initialize();
+      }
+
+      const ragResponse = await retrievalChain.invoke({ input: query }); // Use retrievalChain.invoke
+
+      // Extract sources from the ragResponse.context
+      const sources = ragResponse.context?.map((item: any) => item.metadata?.source) || [];
+
+      return { response: ragResponse.answer, sources };
+    } catch (error: any) {
+      console.error("[RagService][handleRagRequestWithCitations]Error querying RAG system with citations:", error);
+      return { response: `Error: ${error.message}`, sources: [] };
+    }
+  }
+
   async processQuery(query: string): Promise<ClineMessage> {
     if (!this.retrievalChain) {
       // throw new Error("Retrieval chain is not initialized. Call initialize() first.");
-      console.log(`[RagService] retrievalChain not initialized...initializing...`);
+      console.log(`[RagService][processQuery] retrievalChain not initialized...initializing...`);
       await this.initialize();
     }
     const ragResponse = await handleRagRequest(query);

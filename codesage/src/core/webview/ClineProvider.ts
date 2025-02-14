@@ -1573,6 +1573,48 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 							await this.updateGlobalState("mode", defaultModeSlug)
 							await this.postStateToWebview()
 						}
+						break
+					case "insertIntoEditor":
+						// Handle the insertIntoEditor message
+						const textToInsert = message.text
+						if (textToInsert) {
+							// Get the active text editor
+							const editor = vscode.window.activeTextEditor
+							if (editor) {
+								// Insert the text at the current cursor position
+								editor.edit((editBuilder) => {
+									editBuilder.insert(editor.selection.active, textToInsert)
+								})
+							} else {
+								// Create a new untitled document and insert the text
+								const doc = await vscode.workspace.openTextDocument({ content: textToInsert })
+								await vscode.window.showTextDocument(doc, vscode.ViewColumn.One, false)
+							}
+						}
+						break
+					case "selectDirectory":
+						console.log("🔔 selectDirectory")
+						const selectedFolder = await openFolderDialog()
+						if (selectedFolder) {
+							// // Process the directory and get the file content
+							// const fileContent = await this.cline?.directoryService.processDirectory(selectedFolder)
+							// // Send the file content back to the webview
+							// await this.postMessageToWebview({ type: "directorySelected", text: fileContent })
+							try {
+								// Process the directory and get the file content
+								const fileContent = await this.cline?.directoryService.processDirectory(selectedFolder)
+								console.log(`[ClineProvider::selectDirectory] fileContent = ${fileContent?.substring(0, 100)}`)
+								if (this.cline) {
+									this.cline.directoryContent = fileContent
+								} else {
+									console.log(`[ClineProvider::selectDirectory] no Cline just yet...`)
+								}
+							} catch (error) {
+								console.error("Error processing directory:", error)
+								vscode.window.showErrorMessage(`Error processing directory: ${error.message}`)
+							}
+						}
+						break
 				}
 			},
 			null,

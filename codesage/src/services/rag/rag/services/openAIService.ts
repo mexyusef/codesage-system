@@ -11,13 +11,24 @@
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { getRagSettings } from "../../ragSettings"; // Import the settings provider
 
-const ragSettings = getRagSettings();
-console.log(`*** openAIService *** initial embeddings values: ${JSON.stringify(ragSettings, null, 2)}`);
+// const ragSettings = getRagSettings();
+// console.log(`*** openAIService *** initial embeddings values: ${JSON.stringify(ragSettings, null, 2)}`);
+// export const embeddings = new OpenAIEmbeddings({
+//   openAIApiKey: ragSettings.OPENAI_API_KEY,
+//   modelName: ragSettings.EMBEDDING_MODEL_NAME,
+//   maxRetries: ragSettings.OPENAI_MAX_RETRIES,
+//   maxConcurrency: ragSettings.OPENAI_MAX_CONCURRENCY,
+//   timeout: ragSettings.OPENAI_TIMEOUT,
+// });
 
-export const embeddings = new OpenAIEmbeddings({
-  openAIApiKey: ragSettings.OPENAI_API_KEY,
-  modelName: ragSettings.EMBEDDING_MODEL_NAME,
-  maxRetries: ragSettings.OPENAI_MAX_RETRIES,
-  maxConcurrency: ragSettings.OPENAI_MAX_CONCURRENCY,
-  timeout: ragSettings.OPENAI_TIMEOUT,
-});
+export function getEmbeddings() {
+  const ragSettings = getRagSettings();
+  const embeddings = new OpenAIEmbeddings({
+    openAIApiKey: ragSettings.OPENAI_API_KEY,
+    modelName: ragSettings.EMBEDDING_MODEL_NAME,
+    maxRetries: ragSettings.OPENAI_MAX_RETRIES,
+    maxConcurrency: ragSettings.OPENAI_MAX_CONCURRENCY,
+    timeout: ragSettings.OPENAI_TIMEOUT,
+  });
+  return embeddings;
+}

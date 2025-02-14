@@ -3,7 +3,7 @@ import { validateFolderPath } from "./config/validateConfig.js";
 import { readAndFilterFiles } from "./utils/fileUtils.js";
 import { splitDocuments } from "./utils/textSplitter.js";
 import { initializePineconeStore } from "./services/pineconeService.js";
-import { embeddings } from "./services/openAIService.js";
+import { getEmbeddings } from "./services/openAIService.js";
 import { createChain } from "./services/chainService.js";
 import { queryRagSystem } from "./utils/queryRagSystem.js";
 import readline from "readline";
@@ -39,7 +39,7 @@ export async function main(): Promise<void> {
     const docs = await splitDocuments(rawDocs);
 
     // Initialize Pinecone store and retrieval chain
-    const pineconeStore = await initializePineconeStore(docs, embeddings);
+    const pineconeStore = await initializePineconeStore(docs, getEmbeddings());
     const retrievalChain = await createChain(pineconeStore);
 
     console.log("Welcome to the RAG System REPL!");

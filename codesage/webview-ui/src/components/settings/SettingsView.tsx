@@ -65,6 +65,7 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 	const [apiErrorMessage, setApiErrorMessage] = useState<string | undefined>(undefined)
 	const [modelIdErrorMessage, setModelIdErrorMessage] = useState<string | undefined>(undefined)
 	const [commandInput, setCommandInput] = useState("")
+	const [visible, setVisible] = useState(false)
 
 	const handleSubmit = () => {
 		const apiValidationResult = validateApiConfiguration(apiConfiguration)
@@ -178,14 +179,34 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 					paddingRight: 17,
 				}}>
 				<h3 style={{ color: "var(--vscode-foreground)", margin: 0 }}>Settings</h3>
-				<VSCodeButton onClick={handleSubmit}>Done</VSCodeButton>
+				<VSCodeButton 
+					className="glass-effect neon-border-small"
+					onClick={handleSubmit}>Done</VSCodeButton>
 			</div>
 			<div
 				style={{ flexGrow: 1, overflowY: "scroll", paddingRight: 8, display: "flex", flexDirection: "column" }}>
 				<div style={{ marginBottom: 40 }}>
-					<h3 style={{ color: "var(--vscode-foreground)", margin: "0 0 15px 0" }}>Provider Settings</h3>
-					<div style={{ marginBottom: 15 }}>
-						<ApiConfigManager
+
+					<h3 
+						style={{ color: "var(--vscode-foreground)", margin: "0 0 15px 0" }}>Provider Settings</h3>
+
+					<h5
+						className="glass-effect"
+						style={{ color: "var(--vscode-foreground)", margin: "0 0 15px 0" }}>
+							Please provide:<br/>
+							<ol>
+								<li>- Provider</li>
+								<li>- API Key</li>
+								<li>- LLM model</li>
+							</ol>
+							and that's it!
+						</h5>
+
+					<div 
+						className="glass-effect"
+						style={{ marginBottom: 15 }}>
+
+						{visible && <ApiConfigManager
 							currentApiConfigName={currentApiConfigName}
 							listApiConfigMeta={listApiConfigMeta}
 							onSelectConfig={(configName: string) => {
@@ -214,12 +235,14 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 									apiConfiguration,
 								})
 							}}
-						/>
+						/>}
+
 						<ApiOptions apiErrorMessage={apiErrorMessage} modelIdErrorMessage={modelIdErrorMessage} />
+
 					</div>
 				</div>
 
-				<div style={{ marginBottom: 40 }}>
+				{visible && <div style={{ marginBottom: 40 }}>
 					<h3 style={{ color: "var(--vscode-foreground)", margin: "0 0 15px 0" }}>Auto-Approve Settings</h3>
 					<p style={{ fontSize: "12px", marginBottom: 15, color: "var(--vscode-descriptionForeground)" }}>
 						The following settings allow CodeSage to automatically perform operations without requiring approval.
@@ -465,9 +488,9 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 							</div>
 						)}
 					</div>
-				</div>
+				</div>}
 
-				<div style={{ marginBottom: 40 }}>
+				{visible && <div style={{ marginBottom: 40 }}>
 					<h3 style={{ color: "var(--vscode-foreground)", margin: "0 0 15px 0" }}>Browser Settings</h3>
 					<div style={{ marginBottom: 15 }}>
 						<label style={{ fontWeight: "500", display: "block", marginBottom: 5 }}>Viewport size</label>
@@ -525,9 +548,9 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 							but increase token usage.
 						</p>
 					</div>
-				</div>
+				</div>}
 
-				<div style={{ marginBottom: 40 }}>
+				{visible && <div style={{ marginBottom: 40 }}>
 					<h3 style={{ color: "var(--vscode-foreground)", margin: "0 0 15px 0" }}>Notification Settings</h3>
 					<div style={{ marginBottom: 15 }}>
 						<VSCodeCheckbox checked={soundEnabled} onChange={(e: any) => setSoundEnabled(e.target.checked)}>
@@ -571,9 +594,9 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 							</div>
 						</div>
 					)}
-				</div>
+				</div>}
 
-				<div style={{ marginBottom: 40 }}>
+				{visible && <div style={{ marginBottom: 40 }}>
 					<h3 style={{ color: "var(--vscode-foreground)", margin: "0 0 15px 0" }}>Advanced Settings</h3>
 					<div style={{ marginBottom: 15 }}>
 						<div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
@@ -699,9 +722,9 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 								/>
 							))}
 					</div>
-				</div>
+				</div>}
 
-				<div
+				{visible && <div
 					style={{
 						textAlign: "center",
 						color: "var(--vscode-descriptionForeground)",
@@ -735,7 +758,7 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 						style={{ marginTop: "5px", width: "auto" }}>
 						Reset State
 					</VSCodeButton>
-				</div>
+				</div>}
 			</div>
 		</div>
 	)

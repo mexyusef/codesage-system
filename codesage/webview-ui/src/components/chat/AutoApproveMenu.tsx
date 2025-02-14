@@ -41,7 +41,9 @@ const AutoApproveMenu = ({ style }: AutoApproveMenuProps) => {
 			id: "readFiles",
 			label: "Read files and directories",
 			shortName: "Read",
-			enabled: alwaysAllowReadOnly ?? false,
+			// enabled: alwaysAllowReadOnly ?? false,
+			// enabled: true,
+			enabled: alwaysAllowReadOnly ?? true,
 			description: "Allows access to read any file on your computer.",
 		},
 		{
@@ -63,21 +65,24 @@ const AutoApproveMenu = ({ style }: AutoApproveMenuProps) => {
 			id: "useBrowser",
 			label: "Use the browser",
 			shortName: "Browser",
-			enabled: alwaysAllowBrowser ?? false,
+			// enabled: alwaysAllowBrowser ?? false,
+			enabled: alwaysAllowBrowser ?? true,
 			description: "Allows ability to launch and interact with any website in a headless browser.",
 		},
-		{
-			id: "useMcp",
-			label: "Use MCP servers",
-			shortName: "MCP",
-			enabled: alwaysAllowMcp ?? false,
-			description: "Allows use of configured MCP servers which may modify filesystem or interact with APIs.",
-		},
+		// {
+		// 	id: "useMcp",
+		// 	label: "Use MCP servers",
+		// 	shortName: "MCP",
+		// 	enabled: alwaysAllowMcp ?? false,
+		// 	description: "Allows use of configured MCP servers which may modify filesystem or interact with APIs.",
+		// },
 		{
 			id: "switchModes",
 			label: "Switch modes & create tasks",
 			shortName: "Modes",
-			enabled: alwaysAllowModeSwitch ?? false,
+			// enabled: alwaysAllowModeSwitch ?? false,
+			enabled: alwaysAllowModeSwitch ?? true,
+			// enabled: true,
 			description:
 				"Allows automatic switching between different AI modes and creating new tasks without requiring approval.",
 		},
@@ -175,6 +180,7 @@ const AutoApproveMenu = ({ style }: AutoApproveMenuProps) => {
 				onClick={toggleExpanded}>
 				<div onClick={(e) => e.stopPropagation()}>
 					<VSCodeCheckbox
+						className="glass-effect"
 						checked={autoApprovalEnabled ?? false}
 						onChange={() => {
 							const newValue = !(autoApprovalEnabled ?? false)
@@ -235,11 +241,14 @@ const AutoApproveMenu = ({ style }: AutoApproveMenuProps) => {
 					{actions.map((action) => (
 						<div key={action.id} style={{ margin: "6px 0" }}>
 							<div onClick={(e) => e.stopPropagation()}>
-								<VSCodeCheckbox checked={action.enabled} onChange={actionHandlers[action.id]}>
+								<VSCodeCheckbox 
+									className="glass-effect"
+									checked={action.enabled} onChange={actionHandlers[action.id]}>
 									{action.label}
 								</VSCodeCheckbox>
 							</div>
 							<div
+								// className="glass-effect"
 								style={{
 									marginLeft: "28px",
 									color: "var(--vscode-descriptionForeground)",

@@ -84,6 +84,7 @@ const ApiConfigManager = ({
 	return (
 		<div style={{ marginBottom: 5 }}>
 			<div
+				// className="glass-effect"
 				style={{
 					display: "flex",
 					flexDirection: "column",

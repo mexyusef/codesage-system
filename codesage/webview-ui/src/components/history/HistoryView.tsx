@@ -164,12 +164,15 @@ const HistoryView = ({ onDone }: HistoryViewProps) => {
 						padding: "10px 17px 10px 20px",
 					}}>
 					<h3 style={{ color: "var(--vscode-foreground)", margin: 0 }}>History</h3>
-					<VSCodeButton onClick={onDone}>Done</VSCodeButton>
+					<VSCodeButton 
+						className="glass-effect neon-border-small"
+						onClick={onDone}>Done</VSCodeButton>
 				</div>
 				<div style={{ padding: "5px 17px 6px 17px" }}>
 					<div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
 						<VSCodeTextField
 							style={{ width: "100%" }}
+							className="glass-effect neon-border-small"
 							placeholder="Search history..."
 							value={searchQuery}
 							onInput={(e) => {
@@ -217,6 +220,7 @@ const HistoryView = ({ onDone }: HistoryViewProps) => {
 						</VSCodeRadioGroup>
 					</div>
 				</div>
+
 				<div style={{ flexGrow: 1, overflowY: "auto", margin: 0 }}>
 					<Virtuoso
 						style={{
@@ -234,7 +238,7 @@ const HistoryView = ({ onDone }: HistoryViewProps) => {
 							<div
 								key={item.id}
 								data-testid={`task-item-${item.id}`}
-								className="history-item"
+								className="history-item glass-effect"
 								style={{
 									cursor: "pointer",
 									borderBottom:

@@ -15,12 +15,12 @@ export interface RagSettings {
 }
 
 export const defaultRagSettings: RagSettings = {
-  OPENAI_API_KEY: "sk-",
+  OPENAI_API_KEY: "",
   OPENAI_MAX_RETRIES: 3,
   OPENAI_MAX_CONCURRENCY: 5,
   OPENAI_TIMEOUT: 30000,
   EMBEDDING_MODEL_NAME: "text-embedding-3-small",
-  PINECONE_API_KEY: "pcsk_...",
+  PINECONE_API_KEY: "",
   PINECONE_INDEX_NAME: "singaparna",
   PINECONE_NAMESPACE: "default",
   RAG_FOLDER_PATH: "C:\\hapus\\upwork\\codesage\\src\\core\\webview",

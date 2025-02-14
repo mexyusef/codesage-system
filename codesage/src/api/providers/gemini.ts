@@ -22,6 +22,17 @@ export class GeminiHandler implements ApiHandler, SingleCompletionHandler {
 			model: this.getModel().id,
 			systemInstruction: systemPrompt,
 		})
+
+		///////////////////////// LOG REQUEST
+		const requestPayload = {
+			contents: messages.map(convertAnthropicMessageToGemini),
+			generationConfig: {
+				// maxOutputTokens: this.getModel().info.maxTokens,
+				temperature: 0,
+			},
+		}
+		console.log("Gemini API Request Payload:", JSON.stringify(requestPayload, null, 2));
+
 		const result = await model.generateContentStream({
 			contents: messages.map(convertAnthropicMessageToGemini),
 			generationConfig: {
